@@ -1,0 +1,32 @@
+# Environment files
+.env
+.env.*
+*.env
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+build/
+dist/
+out/
+.apk
+.aab
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Android
+*.keystore
+*.jks
+
+# Service workers build cache
+.sw-cache/

@@ -1,0 +1,2 @@
+// No migration required
+module {};
