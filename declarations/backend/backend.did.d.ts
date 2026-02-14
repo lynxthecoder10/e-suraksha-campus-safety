@@ -2,22 +2,29 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 
 export interface UserProfile {
-    'username': string,
-    'contactNumber': string,
-    'email': string,
-    'fullName': string,
+    'name': string,
+    'phoneNumber': [] | [string],
+    'emergencyContact': [] | [string],
+    'dateOfBirth': [] | [string],
+    'role': string,
+    'profilePhoto': [] | [string],
+    'userId': string,
 }
 export type UserRole = { 'admin': null } |
 { 'responder': null } |
 { 'user': null };
 export interface UserRoleInfo {
-    'role': UserRole,
-    'principal': Principal,
+    'user': Principal,
+    'role': string,
+    'isActive': boolean,
+    'name': [] | [string],
 }
 export interface AuditLogEntry {
+    'id': bigint,
+    'adminId': Principal,
     'action': string,
+    'targetUser': [] | [Principal],
     'timestamp': bigint,
-    'userId': Principal,
     'details': string,
 }
 export interface LiveDeploymentInfo {
@@ -78,21 +85,31 @@ export interface FeedbackEntry {
     'userId': Principal,
 }
 export interface CrisisBrainPrediction {
-    'riskLevel': string,
+    'highRiskAreas': Array<[GeoLocation, string]>,
+    'crisisTimes': Array<bigint>,
+}
+export interface FeatureStatus {
+    'title': string,
+    'description': string,
+    'implemented': boolean,
     'details': string,
-    'recommendation': string,
+    'functional': boolean,
+    'component': string,
+    'api': string,
+    'status': string,
 }
 export interface FeatureVerificationReport {
-    'features': Array<string>,
+    'features': Array<FeatureStatus>,
+    'completion': bigint,
+    'coverage': bigint,
     'timestamp': bigint,
     'verifier': Principal,
 }
 export interface DashboardSummary {
-    'activeAlerts': bigint,
-    'activeResponders': bigint,
-    'totalUsers': bigint,
-    'systemHealth': { 'optimal': null } | { 'degraded': null } | { 'critical': null },
-    'recentIncidents': bigint,
+    'activeAlertsCount': bigint,
+    'userReportsCount': bigint,
+    'totalIncidentsCount': bigint,
+    'lastSafetyCheck': [] | [bigint],
 }
 export type Variant_closed_open_inProgress = { 'closed': null } | { 'open': null } | { 'inProgress': null };
 export interface SOSConfirmation {

@@ -87,8 +87,8 @@ export default function AuditLogPanel() {
                     </TableCell>
                     <TableCell>{getActionBadge(log.action)}</TableCell>
                     <TableCell className="font-mono text-xs">
-                      {log.targetUser ? (
-                        <>{log.targetUser.toText().slice(0, 8)}...</>
+                      {log.targetUser && log.targetUser.length > 0 ? (
+                        <>{log.targetUser[0].toText().slice(0, 8)}...</>
                       ) : (
                         <span className="text-muted-foreground">N/A</span>
                       )}

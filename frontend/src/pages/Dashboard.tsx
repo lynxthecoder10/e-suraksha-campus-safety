@@ -16,13 +16,13 @@ import DigitalIDPanel from '../components/DigitalIDPanel';
 import UserReportsPanel from '../components/UserReportsPanel';
 import UserProfilePanel from '../components/UserProfilePanel';
 import HelpDialog from '../components/HelpDialog';
-import { 
-  Bell, 
-  FileText, 
-  MessageSquare, 
-  Map, 
-  CreditCard, 
-  Shield, 
+import {
+  Bell,
+  FileText,
+  MessageSquare,
+  Map,
+  CreditCard,
+  Shield,
   AlertCircle,
   CheckCircle,
   Clock,
@@ -85,7 +85,7 @@ export default function Dashboard() {
 
         {/* Personalized Header Area */}
         <Card className="border-2 border-primary/20 shadow-lg overflow-hidden">
-          <div 
+          <div
             className="h-24 bg-gradient-to-r from-primary via-primary/90 to-primary/80 relative"
             style={{
               backgroundImage: 'url(/assets/generated/personalized-header-bg.dim_800x120.png)',
@@ -98,7 +98,7 @@ export default function Dashboard() {
           <CardContent className="pt-0 pb-6 px-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 -mt-12 relative z-10">
               <Avatar className="h-24 w-24 border-4 border-background shadow-xl ring-2 ring-primary/20">
-                <AvatarImage src={userProfile?.profilePhoto || "/assets/generated/student-avatar-placeholder.dim_100x100.png"} alt={userName} />
+                <AvatarImage src={userProfile?.profilePhoto?.[0] || "/assets/generated/student-avatar-placeholder.dim_100x100.png"} alt={userName} />
                 <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
                   {userInitials}
                 </AvatarFallback>
@@ -222,50 +222,50 @@ export default function Dashboard() {
           <Card className="border-2 border-primary/20">
             <CardContent className="p-2">
               <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 h-auto gap-1 bg-transparent">
-                <TabsTrigger 
-                  value="alerts" 
+                <TabsTrigger
+                  value="alerts"
                   className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
                 >
                   <Bell className="h-5 w-5" />
                   <span className="text-xs sm:text-sm font-medium">Alerts</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="report" 
+                <TabsTrigger
+                  value="report"
                   className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
                 >
                   <FileText className="h-5 w-5" />
                   <span className="text-xs sm:text-sm font-medium">Report</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="my-reports" 
+                <TabsTrigger
+                  value="my-reports"
                   className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
                 >
                   <FileText className="h-5 w-5" />
                   <span className="text-xs sm:text-sm font-medium">My Reports</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="messages" 
+                <TabsTrigger
+                  value="messages"
                   className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
                 >
                   <MessageSquare className="h-5 w-5" />
                   <span className="text-xs sm:text-sm font-medium">Messages</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="map" 
+                <TabsTrigger
+                  value="map"
                   className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
                 >
                   <Map className="h-5 w-5" />
                   <span className="text-xs sm:text-sm font-medium">Safety Map</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="id" 
+                <TabsTrigger
+                  value="id"
                   className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
                 >
                   <CreditCard className="h-5 w-5" />
                   <span className="text-xs sm:text-sm font-medium">Digital ID</span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="profile" 
+                <TabsTrigger
+                  value="profile"
                   className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
                 >
                   <User className="h-5 w-5" />

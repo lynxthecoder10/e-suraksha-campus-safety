@@ -1,35 +1,24 @@
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Shield, Moon, Sun } from 'lucide-react';
+import { Shield, Moon, Sun, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useGetCallerUserProfile } from '../hooks/useQueries';
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 
 export default function Header() {
-  const { login, logout: clear, loginStatus, identity } = useInternetIdentity();
+  // const { login, logout: clear, loginStatus, identity } = useInternetIdentity(); // OLD
+  const { user, session, logout, isInitializing } = useSupabaseAuth(); // NEW
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
-  const { data: userProfile } = useGetCallerUserProfile();
 
-  const isAuthenticated = !!identity;
-  const disabled = loginStatus === 'logging-in';
-  const buttonText = loginStatus === 'logging-in' ? 'Logging in...' : isAuthenticated ? 'Logout' : 'Login';
+  // We'll fetch this from Supabase profile later
+  // const { data: userProfile } = useGetCallerUserProfile();
+  const userProfile = user?.user_metadata?.full_name ? { name: user.user_metadata.full_name } : null;
 
-  const handleAuth = async () => {
-    if (isAuthenticated) {
-      await clear();
-      queryClient.clear();
-    } else {
-      try {
-        await login();
-      } catch (error: any) {
-        console.error('Login error:', error);
-        if (error.message === 'User is already authenticated') {
-          await clear();
-          setTimeout(() => login(), 300);
-        }
-      }
-    }
+  const isAuthenticated = !!user;
+
+  const handleLogout = async () => {
+    await logout();
+    queryClient.clear();
   };
 
   return (
@@ -46,10 +35,10 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          {isAuthenticated && userProfile && (
+          {isAuthenticated && (
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/50">
               <Shield className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">{userProfile.name}</span>
+              <span className="text-sm font-medium">{user?.email?.split('@')[0] || 'User'}</span>
             </div>
           )}
 
@@ -64,14 +53,16 @@ export default function Header() {
             <span className="sr-only">Toggle theme</span>
           </Button>
 
-          <Button
-            onClick={handleAuth}
-            disabled={disabled}
-            variant={isAuthenticated ? 'outline' : 'default'}
-            className="rounded-full"
-          >
-            {buttonText}
-          </Button>
+          {isAuthenticated && (
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="rounded-full gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          )}
         </div>
       </div>
     </header>

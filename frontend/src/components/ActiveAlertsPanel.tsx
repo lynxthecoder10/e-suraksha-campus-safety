@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { AlertTriangle, Phone, Flame, HelpCircle, MapPin, Clock, CheckCircle } from 'lucide-react';
 import type { SOSType } from 'declarations/backend';
 import { getSOSTypeKey, getSOSTypeLabel } from '../lib/backendTypes';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 
 interface ActiveAlertsPanelProps {
   isAdmin?: boolean;
@@ -15,7 +15,7 @@ interface ActiveAlertsPanelProps {
 export default function ActiveAlertsPanel({ isAdmin = false }: ActiveAlertsPanelProps) {
   const { data: alerts, isLoading } = useGetActiveAlerts();
   const resolveAlert = useResolveAlert();
-  const { identity } = useInternetIdentity();
+  const { user } = useSupabaseAuth();
 
   const handleResolve = async (alertId: bigint) => {
     try {
@@ -76,7 +76,7 @@ export default function ActiveAlertsPanel({ isAdmin = false }: ActiveAlertsPanel
         ) : (
           <div className="space-y-4">
             {alerts.map((alert) => {
-              const isOwnAlert = identity?.getPrincipal().toString() === alert.userId.toText();
+              const isOwnAlert = user?.id === alert.userId.toText();
               const canResolve = isAdmin || isOwnAlert;
 
               return (
@@ -114,12 +114,11 @@ export default function ActiveAlertsPanel({ isAdmin = false }: ActiveAlertsPanel
                     </Button>
                   )}
                 </div>
-                </div>
-        );
+              );
             })}
-      </div>
+          </div>
         )}
-    </CardContent>
+      </CardContent>
     </Card >
   );
 }

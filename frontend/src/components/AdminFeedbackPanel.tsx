@@ -18,7 +18,7 @@ export default function AdminFeedbackPanel() {
   }
 
   const averageRating = feedback && feedback.length > 0
-    ? (feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length).toFixed(1)
+    ? (feedback.reduce((sum, f) => sum + Number(f.rating), 0) / feedback.length).toFixed(1)
     : '0';
 
   return (
@@ -46,12 +46,11 @@ export default function AdminFeedbackPanel() {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
-                        className={`h-4 w-4 ${
-                          i < entry.rating ? 'fill-chart-4 text-chart-4' : 'text-muted-foreground'
-                        }`}
+                        className={`h-4 w-4 ${i < Number(entry.rating) ? 'fill-chart-4 text-chart-4' : 'text-muted-foreground'
+                          }`}
                       />
                     ))}
-                    <Badge variant="outline">{entry.rating}/5</Badge>
+                    <Badge variant="outline">{entry.rating.toString()}/5</Badge>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />

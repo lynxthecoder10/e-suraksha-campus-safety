@@ -22,9 +22,9 @@ export default function UserProfilePanel() {
   useEffect(() => {
     if (userProfile) {
       setName(userProfile.name);
-      setPhoneNumber(userProfile.phoneNumber || '');
-      setEmergencyContact(userProfile.emergencyContact || '');
-      setDateOfBirth(userProfile.dateOfBirth || '');
+      setPhoneNumber(userProfile.phoneNumber?.[0] || '');
+      setEmergencyContact(userProfile.emergencyContact?.[0] || '');
+      setDateOfBirth(userProfile.dateOfBirth?.[0] || '');
     }
   }, [userProfile]);
 
@@ -39,12 +39,12 @@ export default function UserProfilePanel() {
     try {
       await saveProfile.mutateAsync({
         name: name.trim(),
-        phoneNumber: phoneNumber.trim() || undefined,
-        emergencyContact: emergencyContact.trim() || undefined,
-        dateOfBirth: dateOfBirth.trim() || undefined,
+        phoneNumber: phoneNumber.trim() ? [phoneNumber.trim()] : [],
+        emergencyContact: emergencyContact.trim() ? [emergencyContact.trim()] : [],
+        dateOfBirth: dateOfBirth.trim() ? [dateOfBirth.trim()] : [],
         role: userProfile?.role || 'Student',
         userId: userProfile?.userId || '',
-        profilePhoto: userProfile?.profilePhoto,
+        profilePhoto: userProfile?.profilePhoto || [],
       });
       toast.success('Profile updated successfully');
     } catch (error: any) {
@@ -93,7 +93,7 @@ export default function UserProfilePanel() {
         <CardContent className="pt-6">
           <div className="flex items-center gap-6">
             <Avatar className="h-24 w-24 border-4 border-primary/20">
-              <AvatarImage src={userProfile?.profilePhoto || "/assets/generated/student-avatar-placeholder.dim_100x100.png"} alt={name} />
+              <AvatarImage src={userProfile?.profilePhoto?.[0] || "/assets/generated/student-avatar-placeholder.dim_100x100.png"} alt={name} />
               <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
                 {getInitials(name || 'User')}
               </AvatarFallback>

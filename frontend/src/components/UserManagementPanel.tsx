@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useGetAllUsers, useUpdateUserRole, useSetAccountStatus } from '../hooks/useQueries';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,18 +18,18 @@ export default function UserManagementPanel() {
   const { data: users = [], isLoading } = useGetAllUsers();
   const updateRole = useUpdateUserRole();
   const setAccountStatus = useSetAccountStatus();
-  const { identity, logout: clear } = useInternetIdentity();
+  const { user, logout } = useSupabaseAuth();
   const queryClient = useQueryClient();
 
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<boolean | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<'role' | 'status'>('role');
 
-  const currentUserPrincipal = identity?.getPrincipal().toString();
+  const currentUserPrincipal = user?.id;
 
-  const handleRoleChange = (userPrincipal: string, newRole: UserRole) => {
+  const handleRoleChange = (userPrincipal: string, newRole: string) => {
     setSelectedUser(userPrincipal);
     setSelectedRole(newRole);
     setActionType('role');
@@ -48,7 +48,13 @@ export default function UserManagementPanel() {
 
     try {
       if (actionType === 'role' && selectedRole !== null) {
-        await updateRole.mutateAsync({ user: selectedUser, role: selectedRole });
+        let roleVariant: UserRole;
+        switch (selectedRole) {
+          case 'admin': roleVariant = { 'admin': null }; break;
+          case 'responder': roleVariant = { 'responder': null }; break;
+          default: roleVariant = { 'user': null }; break;
+        }
+        await updateRole.mutateAsync({ user: selectedUser, role: roleVariant });
 
         toast.success('User role updated successfully', {
           description: `Role changed to ${selectedRole}. User session invalidated.`,
@@ -60,7 +66,7 @@ export default function UserManagementPanel() {
             description: 'Please log in again to continue.',
           });
           setTimeout(async () => {
-            await clear();
+            await logout();
             queryClient.clear();
           }, 2000);
         }
@@ -77,7 +83,7 @@ export default function UserManagementPanel() {
             description: 'Please contact an administrator.',
           });
           setTimeout(async () => {
-            await clear();
+            await logout();
             queryClient.clear();
           }, 2000);
         }
@@ -194,7 +200,7 @@ export default function UserManagementPanel() {
                         <div className="flex items-center gap-2">
                           <Select
                             value={user.role}
-                            onValueChange={(value) => handleRoleChange(user.user.toText(), value as UserRole)}
+                            onValueChange={(value) => handleRoleChange(user.user.toText(), value)}
                           >
                             <SelectTrigger className="w-32">
                               <SelectValue />

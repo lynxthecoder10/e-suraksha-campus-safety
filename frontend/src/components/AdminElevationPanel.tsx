@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAddAdminAccess, useGetAllUsers, useRecoverAdminSession } from '../hooks/useQueries';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,10 +21,10 @@ export default function AdminElevationPanel() {
   const addAdminAccess = useAddAdminAccess();
   const recoverAdminSession = useRecoverAdminSession();
   const { data: users = [] } = useGetAllUsers();
-  const { logout: clear, identity } = useInternetIdentity();
+  const { logout, user } = useSupabaseAuth();
   const queryClient = useQueryClient();
 
-  const isAdmin = users.some(u => u.user.toText() === identity?.getPrincipal().toString() && u.role === 'admin');
+  const isAdmin = users.some(u => u.user.toText() === user?.id && u.role === 'admin');
   const adminCount = users.filter(u => u.role === 'admin' && u.isActive).length;
 
   const handleRecoverAdmin = async () => {
@@ -37,7 +37,7 @@ export default function AdminElevationPanel() {
 
       // Force logout and clear cache after recovery
       setTimeout(async () => {
-        await clear();
+        await logout();
         queryClient.clear();
         window.location.reload();
       }, 2000);

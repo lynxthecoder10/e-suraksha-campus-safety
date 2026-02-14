@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard, RefreshCw, Download } from 'lucide-react';
 import { useGetCallerUserProfile, useGetCallerUserRole } from '../hooks/useQueries';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 
 export default function DigitalIDPanel() {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
@@ -12,20 +12,20 @@ export default function DigitalIDPanel() {
   const [isGenerating, setIsGenerating] = useState(false);
   const { data: userProfile } = useGetCallerUserProfile();
   const { data: userRole } = useGetCallerUserRole();
-  const { identity } = useInternetIdentity();
+  const { user } = useSupabaseAuth();
 
   const generateQRCode = async () => {
-    if (!identity || !userProfile) return;
+    if (!user || !userProfile) return;
 
     setIsGenerating(true);
     try {
-      const principal = identity.getPrincipal().toString();
+      const principal = user.id;
       const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-      
+
       const idData = {
         principal,
         name: userProfile.name,
-        role: userRole || 'user',
+        role: userRole ? Object.keys(userRole)[0] : 'user',
         expiresAt: expiry.toISOString(),
         signature: await generateSignature(principal, expiry),
       };
@@ -50,7 +50,7 @@ export default function DigitalIDPanel() {
       canvas.width = size;
       canvas.height = size;
       const ctx = canvas.getContext('2d');
-      
+
       if (!ctx) {
         resolve('');
         return;
@@ -60,14 +60,14 @@ export default function DigitalIDPanel() {
       // In production, use a proper QR code library
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, size, size);
-      
+
       ctx.fillStyle = '#000000';
       const moduleSize = 10;
       const modules = Math.floor((size - padding * 2) / moduleSize);
-      
+
       // Generate a simple pattern based on data hash
       const hash = data.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      
+
       for (let y = 0; y < modules; y++) {
         for (let x = 0; x < modules; x++) {
           const shouldFill = ((x + y + hash) % 3) === 0;
@@ -137,8 +137,8 @@ export default function DigitalIDPanel() {
         {!qrCodeUrl ? (
           <div className="text-center py-12 space-y-4">
             <div className="relative w-64 h-64 mx-auto bg-muted rounded-lg overflow-hidden">
-              <img 
-                src="/assets/generated/digital-id-template.dim_400x250.png" 
+              <img
+                src="/assets/generated/digital-id-template.dim_400x250.png"
                 alt="Digital ID Template"
                 className="w-full h-full object-cover opacity-50"
               />
@@ -183,7 +183,7 @@ export default function DigitalIDPanel() {
               <p className="text-sm font-medium">Identity Information</p>
               <div className="text-sm space-y-1">
                 <p><strong>Name:</strong> {userProfile?.name}</p>
-                <p><strong>Role:</strong> {userRole || 'user'}</p>
+                <p><strong>Role:</strong> {userRole ? Object.keys(userRole)[0] : 'user'}</p>
                 <p className="text-xs text-muted-foreground mt-2">
                   This QR code is encrypted and time-limited for security.
                 </p>

@@ -16,7 +16,7 @@ export default function ProfileSetupModal() {
   const [role, setRole] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-  
+
   const saveProfile = useSaveCallerUserProfile();
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
 
@@ -49,7 +49,7 @@ export default function ProfileSetupModal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       toast.error('Please enter your name');
       return;
@@ -62,15 +62,15 @@ export default function ProfileSetupModal() {
 
     try {
       const userId = generateUserId();
-      
+
       await saveProfile.mutateAsync({
         name: name.trim(),
-        phoneNumber: phoneNumber.trim() || undefined,
-        emergencyContact: emergencyContact.trim() || undefined,
-        dateOfBirth: dateOfBirth.trim() || undefined,
+        phoneNumber: phoneNumber.trim() ? [phoneNumber.trim()] : [],
+        emergencyContact: emergencyContact.trim() ? [emergencyContact.trim()] : [],
+        dateOfBirth: dateOfBirth.trim() ? [dateOfBirth.trim()] : [],
         role,
         userId,
-        profilePhoto: undefined,
+        profilePhoto: [],
       });
 
       // Show success message
@@ -111,8 +111,8 @@ export default function ProfileSetupModal() {
         return;
       }
     }}>
-      <DialogContent 
-        className="sm:max-w-md" 
+      <DialogContent
+        className="sm:max-w-md"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
         aria-describedby="profile-setup-description"
@@ -136,7 +136,7 @@ export default function ProfileSetupModal() {
               autoFocus
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="role" className="flex items-center gap-2">
               <Shield className="h-4 w-4" aria-hidden="true" />
@@ -168,7 +168,7 @@ export default function ProfileSetupModal() {
               placeholder="+1 (555) 000-0000"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="emergency">Emergency Contact</Label>
             <Input
@@ -179,7 +179,7 @@ export default function ProfileSetupModal() {
               placeholder="+1 (555) 000-0000"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="dob">Date of Birth</Label>
             <Input
@@ -189,10 +189,10 @@ export default function ProfileSetupModal() {
               onChange={(e) => setDateOfBirth(e.target.value)}
             />
           </div>
-          
-          <Button 
-            type="submit" 
-            className="w-full" 
+
+          <Button
+            type="submit"
+            className="w-full"
             disabled={saveProfile.isPending}
             aria-busy={saveProfile.isPending}
           >

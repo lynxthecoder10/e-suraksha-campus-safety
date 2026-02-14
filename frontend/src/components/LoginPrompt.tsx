@@ -1,25 +1,25 @@
 import { useState } from 'react';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Shield, AlertTriangle, MapPin, Activity, Loader2, Lock } from 'lucide-react';
+import { Shield, AlertTriangle, MapPin, Activity, Loader2, Mail } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function LoginPrompt() {
-  const { login, loginStatus } = useInternetIdentity();
-  const [showAdminSecret, setShowAdminSecret] = useState(false);
-  const [adminSecret, setAdminSecret] = useState('');
+  const { login } = useSupabaseAuth();
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const isLoggingIn = loginStatus === 'logging-in';
-
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
     try {
-      await login();
-      // Session creation happens automatically in App.tsx after successful login
+      await login(email);
     } catch (error) {
       console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -27,9 +27,9 @@ export default function LoginPrompt() {
     <main className="flex-1 flex items-center justify-center px-4 py-12">
       <div className="max-w-4xl w-full space-y-12">
         <div className="text-center space-y-4">
-          <img 
-            src="/assets/generated/campus-shield-logo.dim_200x200.png" 
-            alt="E-Suraksha" 
+          <img
+            src="/assets/generated/campus-shield-logo.dim_200x200.png"
+            alt="E-Suraksha"
             className="h-24 w-24 mx-auto"
           />
           <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary via-chart-1 to-chart-2 bg-clip-text text-transparent">
@@ -76,65 +76,48 @@ export default function LoginPrompt() {
             <CardHeader>
               <CardTitle>Login to Continue</CardTitle>
               <CardDescription>
-                Secure authentication via Internet Identity
+                Secure authentication via Magic Link
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="adminAccess" 
-                  checked={showAdminSecret}
-                  onCheckedChange={(checked) => setShowAdminSecret(checked as boolean)}
-                  disabled={isLoggingIn}
-                />
-                <Label 
-                  htmlFor="adminAccess" 
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                >
-                  Request Admin Access?
-                </Label>
-              </div>
-
-              {showAdminSecret && (
-                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <Label htmlFor="adminSecret" className="flex items-center gap-2">
-                    <Lock className="h-4 w-4" />
-                    Admin Secret
-                  </Label>
-                  <Input
-                    id="adminSecret"
-                    type="password"
-                    value={adminSecret}
-                    onChange={(e) => setAdminSecret(e.target.value)}
-                    placeholder="Enter admin secret (optional)"
-                    disabled={isLoggingIn}
-                    className="font-mono"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Admin secret verification will occur after successful login
-                  </p>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      className="pl-9"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
                 </div>
-              )}
 
-              <Button
-                size="lg"
-                onClick={handleLogin}
-                disabled={isLoggingIn}
-                className="w-full"
-              >
-                {isLoggingIn ? (
-                  <>
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                    Connecting...
-                  </>
-                ) : (
-                  'Login with Internet Identity'
-                )}
-              </Button>
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={isLoading}
+                  className="w-full"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Sending Link...
+                    </>
+                  ) : (
+                    'Send Magic Link'
+                  )}
+                </Button>
 
-              <p className="text-xs text-center text-muted-foreground">
-                By logging in, you agree to our terms of service and privacy policy
-              </p>
+                <p className="text-xs text-center text-muted-foreground">
+                  By logging in, you agree to our terms of service and privacy policy
+                </p>
+              </form>
             </CardContent>
           </Card>
         </div>

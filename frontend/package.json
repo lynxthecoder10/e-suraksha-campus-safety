@@ -6,7 +6,6 @@
   "scripts": {
     "setup": "pnpm i && dfx canister create backend && dfx generate backend && dfx deploy",
     "start": "vite --port 3000",
-    "prebuild": "dfx generate backend",
     "build": "vite build",
     "build:skip-bindings": "vite build && pnpm copy:env",
     "copy:env": "cp env.json dist/",

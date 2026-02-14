@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Send, MessageCircle, Shield } from 'lucide-react';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
+// import { useInternetIdentity } from '../hooks/useInternetIdentity';
 
 interface Message {
   id: string;
@@ -25,12 +25,12 @@ export default function MessagingPanel({ isAdmin = false }: MessagingPanelProps)
   const [newMessage, setNewMessage] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { identity } = useInternetIdentity();
+  // const { identity } = useInternetIdentity();
 
   useEffect(() => {
     // Simulate WebSocket connection
     setIsConnected(true);
-    
+
     // Load mock messages
     const mockMessages: Message[] = [
       {
@@ -96,7 +96,7 @@ export default function MessagingPanel({ isAdmin = false }: MessagingPanelProps)
           </Badge>
         </CardTitle>
         <CardDescription>
-          {isAdmin 
+          {isAdmin
             ? 'Communicate with students and respond to inquiries'
             : 'Chat securely with campus security and responders'}
         </CardDescription>
@@ -116,11 +116,10 @@ export default function MessagingPanel({ isAdmin = false }: MessagingPanelProps)
                   </AvatarFallback>
                 </Avatar>
                 <div className={`flex-1 max-w-[70%] ${message.isResponder ? '' : 'text-right'}`}>
-                  <div className={`inline-block p-3 rounded-lg ${
-                    message.isResponder 
-                      ? 'bg-muted' 
-                      : 'bg-primary text-primary-foreground'
-                  }`}>
+                  <div className={`inline-block p-3 rounded-lg ${message.isResponder
+                    ? 'bg-muted'
+                    : 'bg-primary text-primary-foreground'
+                    }`}>
                     <p className="text-sm font-medium mb-1">{message.sender}</p>
                     <p className="text-sm">{message.content}</p>
                   </div>

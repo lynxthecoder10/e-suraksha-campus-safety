@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import type { ExternalBlob } from 'declarations/backend';
+// import type { ExternalBlob } from 'declarations/backend';
 import { Upload, X, MapPin, FileImage, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -130,38 +130,11 @@ export default function IncidentReportPanel() {
     }
 
     try {
-      const mediaBlobs: ExternalBlob[] = [];
-
-      // Process media files with progress tracking
-      if (mediaFiles.length > 0) {
-        toast.info('Processing media files...', {
-          description: `Uploading ${mediaFiles.length} file(s)`,
-        });
-      }
-
-      for (let i = 0; i < mediaFiles.length; i++) {
-        const file = mediaFiles[i];
-        try {
-          const arrayBuffer = await file.arrayBuffer();
-          const uint8Array = new Uint8Array(arrayBuffer);
-
-          const blob = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
-            setUploadProgress((prev) => ({ ...prev, [file.name]: percentage }));
-          });
-
-          mediaBlobs.push(blob);
-        } catch (error) {
-          console.error(`Failed to process file ${file.name}:`, error);
-          toast.error(`Failed to process ${file.name}`, {
-            description: 'This file will be skipped.',
-          });
-        }
-      }
-
+      // Submit directly passing File[]
       const reportId = await reportIncident.mutateAsync({
         description: description.trim(),
         location,
-        media: mediaBlobs,
+        media: mediaFiles,
       });
 
       toast.success('Incident Report Submitted', {
