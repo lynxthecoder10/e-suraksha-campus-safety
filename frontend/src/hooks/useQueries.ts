@@ -418,7 +418,7 @@ export function useGetActiveAlerts() {
   // Removed useActor since we are using Supabase
   // const { actor, isFetching: actorFetching } = useActor(); 
 
-  return useQuery<AlertStatus[]>({
+  return useQuery<EmergencyAlert[]>({
     queryKey: ['activeAlerts'],
     queryFn: async () => {
       // Fetch from Supabase
@@ -432,12 +432,36 @@ export function useGetActiveAlerts() {
         throw error;
       }
 
-      // Map Supabase rows to the frontend AlertStatus type expected by components
-      return (data || []).map((row: any) => ({
-        status: { 'active': null }, // Motoko Variant
-        updatedAt: BigInt(new Date(row.updated_at).getTime()) * 1000000n, // Nano seconds
-        alertId: BigInt(row.id)
-      }));
+      // Map Supabase rows to the frontend EmergencyAlert type expected by components
+      return (data || []).map((row: any) => {
+        // Map sos_type string to discriminated union
+        let sosType: SOSType;
+        switch (row.sos_type) {
+          case 'medical':
+            sosType = { 'medical': null };
+            break;
+          case 'fire':
+            sosType = { 'fire': null };
+            break;
+          case 'security':
+            sosType = { 'security': null };
+            break;
+          default:
+            sosType = { 'other': null };
+        }
+
+        return {
+          status: { 'active': null }, // Motoko Variant
+          timestamp: BigInt(new Date(row.created_at).getTime()) * 1000000n, // Nano seconds
+          location: {
+            latitude: row.latitude || 0,
+            longitude: row.longitude || 0
+          },
+          sosType,
+          alertId: BigInt(row.id),
+          userId: { _arr: new Uint8Array(), _isPrincipal: true, toText: () => row.user_id || 'anonymous' } as any // Mock Principal
+        };
+      });
     },
     // No actor dependency needed
     refetchInterval: 3000,

@@ -76,12 +76,12 @@ export default function ActiveAlertsPanel({ isAdmin = false }: ActiveAlertsPanel
         ) : (
           <div className="space-y-4">
             {alerts.map((alert) => {
-              const isOwnAlert = identity?.getPrincipal().toString() === alert.user.toString();
+              const isOwnAlert = identity?.getPrincipal().toString() === alert.userId.toText();
               const canResolve = isAdmin || isOwnAlert;
 
               return (
                 <div
-                  key={alert.id.toString()}
+                  key={alert.alertId.toString()}
                   className="p-4 border rounded-lg space-y-3 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -100,28 +100,26 @@ export default function ActiveAlertsPanel({ isAdmin = false }: ActiveAlertsPanel
                           <MapPin className="h-4 w-4" />
                           {alert.location.latitude.toFixed(4)}, {alert.location.longitude.toFixed(4)}
                         </div>
-                        {alert.extraData && (
-                          <p className="text-sm mt-2">{alert.extraData}</p>
-                        )}
                       </div>
                     </div>
-                    {canResolve && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleResolve(alert.id)}
-                        disabled={resolveAlert.isPending}
-                      >
-                        Resolve
-                      </Button>
-                    )}
                   </div>
+                  {canResolve && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResolve(alert.alertId)}
+                      disabled={resolveAlert.isPending}
+                    >
+                      Resolve
+                    </Button>
+                  )}
                 </div>
-              );
+                </div>
+        );
             })}
-          </div>
+      </div>
         )}
-      </CardContent>
-    </Card>
+    </CardContent>
+    </Card >
   );
 }
