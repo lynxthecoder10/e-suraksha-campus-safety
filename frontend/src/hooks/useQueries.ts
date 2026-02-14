@@ -21,9 +21,10 @@ import type {
   DashboardSummary,
   Variant_closed_open_inProgress,
   LiveDeploymentInfo,
-  SOSConfirmation
+  SOSConfirmation,
+  ExternalBlob
 } from 'declarations/backend';
-import { ExternalBlob } from 'declarations/backend';
+
 
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();

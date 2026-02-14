@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { UserCog, Shield, User as UserIcon, Ban, CheckCircle, AlertTriangle, Info } from 'lucide-react';
-import { UserRole } from 'declarations/backend';
+import type { UserRole } from 'declarations/backend';
 
 export default function UserManagementPanel() {
   const { data: users = [], isLoading } = useGetAllUsers();

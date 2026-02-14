@@ -40,3 +40,7 @@ export const createActor = (canisterId, options = {}) => {
 };
 
 export const canisterId = process.env.CANISTER_ID_BACKEND || "mock-backend-id";
+
+// Re-export types for TypeScript (these are type-only exports)
+// At runtime, these won't exist, but TypeScript needs them for type checking
+export * from './backend.did.d.ts';

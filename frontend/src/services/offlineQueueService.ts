@@ -1,5 +1,5 @@
 // Offline queue service for storing SOS events when offline
-import { SOSType, GeoLocation } from 'declarations/backend';
+import type { SOSType, GeoLocation } from 'declarations/backend';
 
 export interface QueuedSOSEvent {
   id: string;

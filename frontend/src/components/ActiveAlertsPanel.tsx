@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { AlertTriangle, Phone, Flame, HelpCircle, MapPin, Clock, CheckCircle } from 'lucide-react';
-import { SOSType } from 'declarations/backend';
+import type { SOSType } from 'declarations/backend';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 
 interface ActiveAlertsPanelProps {

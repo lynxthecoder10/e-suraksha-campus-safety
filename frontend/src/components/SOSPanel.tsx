@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTriggerAlert } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { SOSType, SOSConfirmation } from 'declarations/backend';
+import type { SOSType, SOSConfirmation } from 'declarations/backend';
 import { Shield, MapPin, Loader2, CheckCircle, Wifi, WifiOff, Clock, MapPinned, Hash } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { locationService } from '../services/locationService';

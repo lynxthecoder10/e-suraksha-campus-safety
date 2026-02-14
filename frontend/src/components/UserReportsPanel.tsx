@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { FileText, Eye, Clock, MessageSquare, User, MapPin } from 'lucide-react';
-import { Variant_closed_open_inProgress } from 'declarations/backend';
+import type { Variant_closed_open_inProgress } from 'declarations/backend';
 
 export default function UserReportsPanel() {
   const { data: reports = [], isLoading } = useGetUserIncidentReports();

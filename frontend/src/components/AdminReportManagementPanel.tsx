@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { FileText, Eye, MessageSquare, Clock, User, AlertCircle } from 'lucide-react';
-import { Variant_closed_open_inProgress } from 'declarations/backend';
+import type { Variant_closed_open_inProgress } from 'declarations/backend';
 
 export default function AdminReportManagementPanel() {
   const { data: reports = [], isLoading } = useGetHistoricalReports();

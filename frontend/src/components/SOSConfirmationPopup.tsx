@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, MapPin, Clock, Hash, Phone, AlertCircle, X } from 'lucide-react';
-import { SOSConfirmation } from 'declarations/backend';
+import type { SOSConfirmation } from 'declarations/backend';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';

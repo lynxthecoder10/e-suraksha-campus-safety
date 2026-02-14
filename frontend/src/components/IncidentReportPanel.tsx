@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { ExternalBlob } from 'declarations/backend';
+import type { ExternalBlob } from 'declarations/backend';
 import { Upload, X, MapPin, FileImage, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
