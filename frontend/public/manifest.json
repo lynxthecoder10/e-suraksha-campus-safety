@@ -11,28 +11,10 @@
   "id": "/",
   "icons": [
     {
-      "src": "/assets/generated/pwa-icon-192.dim_192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/assets/generated/pwa-icon-192.dim_192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/assets/generated/pwa-icon-512.dim_512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/assets/generated/pwa-icon-512.dim_512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "src": "/assets/generated/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ],
   "categories": ["safety", "education", "utilities", "lifestyle"],
@@ -49,9 +31,9 @@
       "url": "/?action=sos",
       "icons": [
         {
-          "src": "/assets/generated/sos-button.dim_128x128.png",
+          "src": "/assets/generated/sos.svg",
           "sizes": "128x128",
-          "type": "image/png"
+          "type": "image/svg+xml"
         }
       ]
     }

@@ -28,5 +28,11 @@ out/
 *.keystore
 *.jks
 
+# DFX
+.dfx/
+canister_ids.json
+.vessel/
+.mops/
+
 # Service workers build cache
 .sw-cache/

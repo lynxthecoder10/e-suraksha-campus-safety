@@ -631,11 +631,9 @@ actor {
       Runtime.trap("Unauthorized: Only deployer can recover admin session");
     };
 
-    let activeAdminCount = countActiveAdmins();
-    if (activeAdminCount > 0) {
-      logAuditEntry(caller, "UNNECESSARY_ADMIN_RECOVERY", ?caller, "Recovery attempted with existing admin sessions");
-      Runtime.trap("Unauthorized: Admin sessions exist, recovery not needed");
-    };
+    // REMOVED: activeAdminCount check to allow emergency recovery by deployer at any time
+    // let activeAdminCount = countActiveAdmins();
+    // if (activeAdminCount > 0) { ... }
 
     AccessControl.assignRole(accessControlState, caller, caller, #admin);
 

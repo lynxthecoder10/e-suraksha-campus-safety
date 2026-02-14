@@ -12,12 +12,18 @@ import { OfflineIndicator } from './components/OfflineIndicator';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from 'next-themes';
 import { toast } from 'sonner';
+import { dbAPI } from './utils/db'; // Robust session handling
+
+const SESSION_KEY = 'current-session';
 
 export default function App() {
   const { identity, isInitializing } = useInternetIdentity();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [sessionRestoreAttempted, setSessionRestoreAttempted] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Track if we are actively restoring a session to prevent login flash
+  const [isRestoringSession, setIsRestoringSession] = useState(false);
 
   const createSessionMutation = useCreateUserSession();
   const validateSessionQuery = useValidateStoredSession();
@@ -29,23 +35,25 @@ export default function App() {
     if (sessionRestoreAttempted) return;
 
     const restoreSession = async () => {
-      setSessionRestoreAttempted(true);
+      // Start restoring session - keeps loading state active
+      setIsRestoringSession(true);
 
       try {
-        // Try to restore from localStorage/IndexedDB
-        const storedSession = localStorage.getItem('e-suraksha-session');
+        // Try to restore from IndexedDB for better security
+        const storedSession = await dbAPI.get(SESSION_KEY);
+
         if (storedSession) {
-          const sessionData = JSON.parse(storedSession);
-          
+          const sessionData = storedSession;
+
           // Check if session is expired
           const now = Date.now();
           const expiresAt = Number(sessionData.expiresAt) / 1_000_000; // Convert nanoseconds to milliseconds
-          
+
           if (expiresAt > now) {
             // Session not expired, validate with backend (with timeout)
             try {
               const validationPromise = validateSessionQuery.mutateAsync();
-              const timeoutPromise = new Promise<boolean>((_, reject) => 
+              const timeoutPromise = new Promise<boolean>((_, reject) =>
                 setTimeout(() => reject(new Error('Validation timeout')), 5000)
               );
 
@@ -54,7 +62,7 @@ export default function App() {
               if (isValid) {
                 setUserRole(sessionData.role);
                 console.log('[Session] Restored from storage:', sessionData.role);
-                
+
                 // Cache session in service worker for offline access
                 if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                   navigator.serviceWorker.controller.postMessage({
@@ -66,6 +74,10 @@ export default function App() {
                     }
                   });
                 }
+
+                // Done with restoration
+                setSessionRestoreAttempted(true);
+                setIsRestoringSession(false);
                 return;
               }
             } catch (error) {
@@ -74,13 +86,13 @@ export default function App() {
           } else {
             console.log('[Session] Stored session expired');
           }
-          
+
           // Clear invalid/expired session
-          localStorage.removeItem('e-suraksha-session');
+          await dbAPI.delete(SESSION_KEY);
         }
       } catch (error) {
         console.error('[Session] Restore failed:', error);
-        localStorage.removeItem('e-suraksha-session');
+        await dbAPI.delete(SESSION_KEY);
       }
 
       // Create new session if restoration failed
@@ -88,14 +100,14 @@ export default function App() {
         try {
           const session = await createSessionMutation.mutateAsync();
           setUserRole(session.role);
-          
-          // Store session with expiration
+
+          // Store session with expiration in IndexedDB
           const sessionData = {
             role: session.role,
             expiresAt: session.expiresAt,
             sessionId: session.sessionId,
           };
-          localStorage.setItem('e-suraksha-session', JSON.stringify(sessionData));
+          await dbAPI.put(SESSION_KEY, sessionData);
           console.log('[Session] Created new session:', session.role);
 
           // Cache session data in service worker for offline access
@@ -110,6 +122,9 @@ export default function App() {
           toast.error('Failed to establish session. Please try logging in again.');
         }
       }
+
+      setSessionRestoreAttempted(true);
+      setIsRestoringSession(false);
     };
 
     // Run session restoration asynchronously without blocking UI
@@ -122,15 +137,15 @@ export default function App() {
       if (!identity || !userRole) return;
 
       console.log('[Session] Revalidating session after coming online');
-      
+
       try {
-        const storedSession = localStorage.getItem('e-suraksha-session');
+        const storedSession = await dbAPI.get(SESSION_KEY);
         if (storedSession) {
-          const sessionData = JSON.parse(storedSession);
-          
+          const sessionData = storedSession;
+
           // Validate with timeout
           const validationPromise = validateSessionQuery.mutateAsync();
-          const timeoutPromise = new Promise<boolean>((_, reject) => 
+          const timeoutPromise = new Promise<boolean>((_, reject) =>
             setTimeout(() => reject(new Error('Validation timeout')), 5000)
           );
 
@@ -139,15 +154,15 @@ export default function App() {
           if (!isValid) {
             console.log('[Session] Session invalid, refreshing...');
             const newSession = await refreshSessionMutation.mutateAsync();
-            
+
             const updatedSessionData = {
               role: newSession.role,
               expiresAt: newSession.expiresAt,
               sessionId: newSession.sessionId,
             };
-            localStorage.setItem('e-suraksha-session', JSON.stringify(updatedSessionData));
+            await dbAPI.put(SESSION_KEY, updatedSessionData);
             setUserRole(newSession.role);
-            
+
             toast.success('Session refreshed successfully');
           } else {
             console.log('[Session] Session still valid');
@@ -171,7 +186,7 @@ export default function App() {
       const customEvent = event as CustomEvent;
       const online = customEvent.detail.online;
       setIsOnline(online);
-      
+
       if (online) {
         toast.success('Connection restored');
       } else {
@@ -206,23 +221,23 @@ export default function App() {
 
     const refreshInterval = setInterval(async () => {
       try {
-        const storedSession = localStorage.getItem('e-suraksha-session');
+        const storedSession = await dbAPI.get(SESSION_KEY);
         if (storedSession) {
-          const sessionData = JSON.parse(storedSession);
+          const sessionData = storedSession;
           const now = Date.now();
           const expiresAt = Number(sessionData.expiresAt) / 1_000_000;
-          
+
           // Refresh if session expires in less than 1 hour
           if (expiresAt - now < 60 * 60 * 1000) {
             console.log('[Session] Proactively refreshing session');
             const newSession = await refreshSessionMutation.mutateAsync();
-            
+
             const updatedSessionData = {
               role: newSession.role,
               expiresAt: newSession.expiresAt,
               sessionId: newSession.sessionId,
             };
-            localStorage.setItem('e-suraksha-session', JSON.stringify(updatedSessionData));
+            await dbAPI.put(SESSION_KEY, updatedSessionData);
             setUserRole(newSession.role);
           }
         }
@@ -263,22 +278,22 @@ export default function App() {
     );
   }
 
-  // Show minimal loading only during initial session setup
-  if (!userRole && !sessionRestoreAttempted) {
+  // Show minimal loading only during initial session setup OR restoration
+  if ((!userRole && !sessionRestoreAttempted) || isRestoringSession) {
     return (
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground">Loading...</p>
+            <p className="text-muted-foreground">Restoring secure session...</p>
           </div>
         </div>
       </ThemeProvider>
     );
   }
 
-  // If session restoration attempted but no role, show login again
-  if (!userRole && sessionRestoreAttempted) {
+  // If session restoration attempted AND COMPLETED but no role, show login again
+  if (!userRole && sessionRestoreAttempted && !isRestoringSession) {
     return (
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <div className="min-h-screen flex flex-col bg-background">

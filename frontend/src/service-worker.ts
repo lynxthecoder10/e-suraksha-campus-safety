@@ -2,7 +2,7 @@
 
 declare const self: ServiceWorkerGlobalScope;
 
-const CACHE_VERSION = 'e-suraksha-v2';
+const CACHE_VERSION = 'e-suraksha-v3-fixed';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const SESSION_CACHE = `${CACHE_VERSION}-session`;
@@ -12,9 +12,8 @@ const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/assets/generated/pwa-icon-192.dim_192x192.png',
-  '/assets/generated/pwa-icon-512.dim_512x512.png',
-  '/assets/generated/sos-button.dim_128x128.png',
+  '/assets/generated/icon.svg',
+  '/assets/generated/sos.svg',
 ];
 
 // Install event - cache static assets
@@ -42,10 +41,10 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName.startsWith('e-suraksha-') && 
-              cacheName !== STATIC_CACHE && 
-              cacheName !== DYNAMIC_CACHE && 
-              cacheName !== SESSION_CACHE) {
+          if (cacheName.startsWith('e-suraksha-') &&
+            cacheName !== STATIC_CACHE &&
+            cacheName !== DYNAMIC_CACHE &&
+            cacheName !== SESSION_CACHE) {
             console.log('[Service Worker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -163,7 +162,7 @@ async function networkFirstWithRetry(request: Request, retries = 3): Promise<Res
   for (let i = 0; i < retries; i++) {
     try {
       const response = await fetch(request);
-      
+
       // Cache successful responses
       if (response.ok) {
         const responseToCache = response.clone();
@@ -171,12 +170,12 @@ async function networkFirstWithRetry(request: Request, retries = 3): Promise<Res
           cache.put(request, responseToCache);
         });
       }
-      
+
       return response;
     } catch (error) {
       lastError = error as Error;
       console.log(`[Service Worker] Fetch attempt ${i + 1} failed:`, error);
-      
+
       // Exponential backoff
       if (i < retries - 1) {
         await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
@@ -196,7 +195,7 @@ async function networkFirstWithRetry(request: Request, retries = 3): Promise<Res
 // Handle background sync for offline SOS alerts
 self.addEventListener('sync', (event: any) => {
   console.log('[Service Worker] Background sync triggered:', event.tag);
-  
+
   if (event.tag === 'sync-sos-queue') {
     event.waitUntil(syncOfflineQueue());
   }
@@ -222,13 +221,13 @@ async function syncOfflineQueue(): Promise<void> {
 // Handle push notifications (for future emergency alerts)
 self.addEventListener('push', (event: any) => {
   console.log('[Service Worker] Push notification received');
-  
+
   const data = event.data ? event.data.json() : {};
   const title = data.title || 'E-Suraksha Alert';
   const options = {
     body: data.body || 'New emergency alert',
-    icon: '/assets/generated/pwa-icon-192.dim_192x192.png',
-    badge: '/assets/generated/pwa-icon-192.dim_192x192.png',
+    icon: '/assets/generated/icon.svg',
+    badge: '/assets/generated/icon.svg',
     vibrate: [200, 100, 200],
     tag: 'emergency-alert',
     requireInteraction: true,
@@ -309,4 +308,4 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
 });
 
 // Export empty object to make this a module
-export {};
+export { };
