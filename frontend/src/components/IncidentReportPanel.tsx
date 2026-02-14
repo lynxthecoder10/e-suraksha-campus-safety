@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { ExternalBlob } from '../backend';
+import { ExternalBlob } from 'declarations/backend';
 import { Upload, X, MapPin, FileImage, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -32,7 +32,7 @@ export default function IncidentReportPanel() {
         },
         (error) => {
           let errorMessage = 'Unable to get location. Using default coordinates.';
-          
+
           switch (error.code) {
             case error.PERMISSION_DENIED:
               errorMessage = 'Location access denied. Using default coordinates.';
@@ -44,7 +44,7 @@ export default function IncidentReportPanel() {
               errorMessage = 'Location request timed out. Using default coordinates.';
               break;
           }
-          
+
           setLocationError(errorMessage);
           setLocation({ latitude: 0, longitude: 0 });
           setDetectingLocation(false);
@@ -67,7 +67,7 @@ export default function IncidentReportPanel() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      
+
       // Validate file sizes (max 10MB per file)
       const maxSize = 10 * 1024 * 1024; // 10MB
       const validFiles = newFiles.filter(file => {
@@ -77,7 +77,7 @@ export default function IncidentReportPanel() {
           });
           return false;
         }
-        
+
         // Validate file type
         if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
           toast.error(`File ${file.name} is not supported`, {
@@ -85,10 +85,10 @@ export default function IncidentReportPanel() {
           });
           return false;
         }
-        
+
         return true;
       });
-      
+
       if (validFiles.length > 0) {
         setMediaFiles((prev) => [...prev, ...validFiles]);
         toast.success(`${validFiles.length} file(s) added`, {
@@ -101,7 +101,7 @@ export default function IncidentReportPanel() {
   const removeFile = (index: number) => {
     const fileName = mediaFiles[index]?.name;
     setMediaFiles((prev) => prev.filter((_, i) => i !== index));
-    
+
     // Clear upload progress for removed file
     if (fileName) {
       setUploadProgress((prev) => {
@@ -131,24 +131,24 @@ export default function IncidentReportPanel() {
 
     try {
       const mediaBlobs: ExternalBlob[] = [];
-      
+
       // Process media files with progress tracking
       if (mediaFiles.length > 0) {
         toast.info('Processing media files...', {
           description: `Uploading ${mediaFiles.length} file(s)`,
         });
       }
-      
+
       for (let i = 0; i < mediaFiles.length; i++) {
         const file = mediaFiles[i];
         try {
           const arrayBuffer = await file.arrayBuffer();
           const uint8Array = new Uint8Array(arrayBuffer);
-          
+
           const blob = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
             setUploadProgress((prev) => ({ ...prev, [file.name]: percentage }));
           });
-          
+
           mediaBlobs.push(blob);
         } catch (error) {
           console.error(`Failed to process file ${file.name}:`, error);
@@ -168,12 +168,12 @@ export default function IncidentReportPanel() {
         description: `Report ID: ${reportId.toString()}. Thank you for reporting.`,
         duration: 5000,
       });
-      
+
       // Reset form
       setDescription('');
       setMediaFiles([]);
       setUploadProgress({});
-      
+
       // Reset file input
       const fileInput = document.getElementById('media') as HTMLInputElement;
       if (fileInput) {
@@ -181,10 +181,10 @@ export default function IncidentReportPanel() {
       }
     } catch (error: any) {
       console.error('Failed to submit incident report:', error);
-      
+
       let errorMessage = 'Failed to submit incident report. Please try again.';
       let errorDescription = 'An unexpected error occurred.';
-      
+
       if (error.message) {
         if (error.message.includes('Actor not available')) {
           errorMessage = 'Connection error';
@@ -199,7 +199,7 @@ export default function IncidentReportPanel() {
           errorDescription = error.message;
         }
       }
-      
+
       toast.error(errorMessage, {
         description: errorDescription,
         duration: 7000,
@@ -322,9 +322,9 @@ export default function IncidentReportPanel() {
             </div>
           )}
 
-          <Button 
-            type="submit" 
-            className="w-full" 
+          <Button
+            type="submit"
+            className="w-full"
             disabled={reportIncident.isPending || !location || detectingLocation}
           >
             {reportIncident.isPending ? (

@@ -11,7 +11,7 @@ export const useActor = () => {
     const { data: actor, isLoading: isFetching } = useQuery({
         queryKey: ["actor", identity],
         queryFn: async () => {
-            const agent = new HttpAgent({ identity });
+            const agent = new HttpAgent({ identity: identity ?? undefined });
 
             if (process.env.DFX_NETWORK !== "ic") {
                 await agent.fetchRootKey();

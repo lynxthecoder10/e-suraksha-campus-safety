@@ -6,7 +6,7 @@ import { useTheme } from 'next-themes';
 import { useGetCallerUserProfile } from '../hooks/useQueries';
 
 export default function Header() {
-  const { login, clear, loginStatus, identity } = useInternetIdentity();
+  const { login, logout: clear, loginStatus, identity } = useInternetIdentity();
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
   const { data: userProfile } = useGetCallerUserProfile();
@@ -52,7 +52,7 @@ export default function Header() {
               <span className="text-sm font-medium">{userProfile.name}</span>
             </div>
           )}
-          
+
           <Button
             variant="ghost"
             size="icon"

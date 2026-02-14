@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { FileText, Eye, Clock, MessageSquare, User, MapPin } from 'lucide-react';
-import { Variant_closed_open_inProgress } from '../backend';
+import { Variant_closed_open_inProgress } from 'declarations/backend';
 
 export default function UserReportsPanel() {
   const { data: reports = [], isLoading } = useGetUserIncidentReports();
@@ -135,7 +135,7 @@ export default function UserReportsPanel() {
                   <div>
                     <span className="text-muted-foreground">Location:</span>
                     <p className="mt-1">
-                      Lat: {selectedReportData.location.latitude.toFixed(4)}, 
+                      Lat: {selectedReportData.location.latitude.toFixed(4)},
                       Lng: {selectedReportData.location.longitude.toFixed(4)}
                     </p>
                   </div>

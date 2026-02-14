@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { FileText, Eye, MessageSquare, Clock, User, AlertCircle } from 'lucide-react';
-import { Variant_closed_open_inProgress } from '../backend';
+import { Variant_closed_open_inProgress } from 'declarations/backend';
 
 export default function AdminReportManagementPanel() {
   const { data: reports = [], isLoading } = useGetHistoricalReports();
@@ -212,7 +212,7 @@ export default function AdminReportManagementPanel() {
                   <div>
                     <span className="text-muted-foreground">Location:</span>
                     <p className="mt-1">
-                      Lat: {selectedReportData.location.latitude.toFixed(4)}, 
+                      Lat: {selectedReportData.location.latitude.toFixed(4)},
                       Lng: {selectedReportData.location.longitude.toFixed(4)}
                     </p>
                   </div>

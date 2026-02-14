@@ -12,13 +12,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { UserCog, Shield, User as UserIcon, Ban, CheckCircle, AlertTriangle, Info } from 'lucide-react';
-import { UserRole } from '../backend';
+import { UserRole } from 'declarations/backend';
 
 export default function UserManagementPanel() {
   const { data: users = [], isLoading } = useGetAllUsers();
   const updateRole = useUpdateUserRole();
   const setAccountStatus = useSetAccountStatus();
-  const { identity, clear } = useInternetIdentity();
+  const { identity, logout: clear } = useInternetIdentity();
   const queryClient = useQueryClient();
 
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export default function UserManagementPanel() {
     try {
       if (actionType === 'role' && selectedRole !== null) {
         await updateRole.mutateAsync({ user: selectedUser, role: selectedRole });
-        
+
         toast.success('User role updated successfully', {
           description: `Role changed to ${selectedRole}. User session invalidated.`,
         });
@@ -66,7 +66,7 @@ export default function UserManagementPanel() {
         }
       } else if (actionType === 'status' && selectedStatus !== null) {
         await setAccountStatus.mutateAsync({ user: selectedUser, isActive: selectedStatus });
-        
+
         toast.success('Account status updated successfully', {
           description: selectedStatus ? 'Account enabled' : 'Account disabled. User session invalidated.',
         });
@@ -84,7 +84,7 @@ export default function UserManagementPanel() {
       }
     } catch (error: any) {
       console.error('Error updating user:', error);
-      
+
       // Show generic error message for security
       toast.error('Access denied', {
         description: 'Unable to complete the action. Please check your permissions.',

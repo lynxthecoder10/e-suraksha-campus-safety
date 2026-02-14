@@ -9,6 +9,7 @@ interface InternetIdentityContextType {
     isInitializing: boolean;
     login: () => void;
     logout: () => void;
+    loginStatus: string;
 }
 
 const InternetIdentityContext = createContext<InternetIdentityContextType | null>(null);
@@ -25,6 +26,7 @@ export const InternetIdentityProvider = ({ children }: { children: ReactNode }) 
     const [identity, setIdentity] = useState<Identity | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isInitializing, setIsInitializing] = useState(true);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [authClient, setAuthClient] = useState<AuthClient | null>(null);
 
     useEffect(() => {
@@ -46,14 +48,19 @@ export const InternetIdentityProvider = ({ children }: { children: ReactNode }) 
 
     const login = async () => {
         if (authClient) {
+            setIsLoggingIn(true);
             await authClient.login({
                 identityProvider: process.env.II_URL || "https://identity.internetcomputer.org",
                 onSuccess: () => {
                     const identity = authClient.getIdentity();
                     setIdentity(identity);
                     setIsAuthenticated(true);
+                    setIsLoggingIn(false);
                     window.location.reload(); // Refresh to ensure state is clean
                 },
+                onError: () => {
+                    setIsLoggingIn(false);
+                }
             });
         }
     };
@@ -67,8 +74,10 @@ export const InternetIdentityProvider = ({ children }: { children: ReactNode }) 
         }
     };
 
+    const loginStatus = isLoggingIn ? 'logging-in' : 'idle';
+
     return (
-        <InternetIdentityContext.Provider value={{ identity, isAuthenticated, isInitializing, login, logout }}>
+        <InternetIdentityContext.Provider value={{ identity, isAuthenticated, isInitializing, login, logout, loginStatus }}>
             {children}
         </InternetIdentityContext.Provider>
     );

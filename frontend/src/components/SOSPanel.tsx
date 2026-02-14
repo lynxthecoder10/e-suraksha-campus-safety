@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTriggerAlert } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { SOSType, SOSConfirmation } from '../backend';
+import { SOSType, SOSConfirmation } from 'declarations/backend';
 import { Shield, MapPin, Loader2, CheckCircle, Wifi, WifiOff, Clock, MapPinned, Hash } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { locationService } from '../services/locationService';
@@ -16,7 +16,7 @@ export default function SOSPanel() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [queuedEvents, setQueuedEvents] = useState(0);
   const [sosConfirmation, setSOSConfirmation] = useState<SOSConfirmation | null>(null);
-  
+
   const triggerAlert = useTriggerAlert();
 
   // Initialize location
@@ -30,13 +30,13 @@ export default function SOSPanel() {
       } catch (error: any) {
         setLocationError(error.message);
         setDetectingLocation(false);
-        
+
         // Try to use last known location as fallback
         const lastKnown = locationService.getLastKnownLocation();
         if (lastKnown) {
           setLocation({ latitude: lastKnown.latitude, longitude: lastKnown.longitude });
-          toast.warning('Using last known location', { 
-            description: 'Current location unavailable' 
+          toast.warning('Using last known location', {
+            description: 'Current location unavailable'
           });
         }
       }
@@ -52,7 +52,7 @@ export default function SOSPanel() {
       toast.success('Connection restored', { description: 'Attempting to sync queued events...' });
       processOfflineQueue();
     };
-    
+
     const handleOffline = () => {
       setIsOnline(false);
       toast.warning('Connection lost', { description: 'SOS events will be queued for later' });
@@ -93,9 +93,9 @@ export default function SOSPanel() {
         // Queue for later
         const eventId = offlineQueueService.addToQueue(SOSType.other, currentLocation, null);
         setQueuedEvents(offlineQueueService.getQueueSize());
-        toast.warning('Offline - Event queued', { 
+        toast.warning('Offline - Event queued', {
           description: 'Alert will be sent when connection is restored',
-          duration: 5000 
+          duration: 5000
         });
         return;
       }
@@ -106,31 +106,31 @@ export default function SOSPanel() {
         location: currentLocation,
         extraData: null,
       });
-      
+
       // Show confirmation popup
       setSOSConfirmation(confirmation);
-      
+
       // Also show toast for immediate feedback
       toast.success('Emergency alert sent!', {
         description: `Alert ID: ${confirmation.alertId.toString()}. Campus security has been notified.`,
         duration: 5000,
         icon: <CheckCircle className="h-5 w-5 text-success" />,
       });
-      
+
     } catch (error: any) {
       console.error('Failed to send emergency alert:', error);
-      
+
       // Queue if network error
       if (error.message?.includes('network') || error.message?.includes('connection')) {
         const eventId = offlineQueueService.addToQueue(SOSType.other, currentLocation, null);
         setQueuedEvents(offlineQueueService.getQueueSize());
-        toast.warning('Network error - Event queued', { 
+        toast.warning('Network error - Event queued', {
           description: 'Alert will be sent when connection is restored',
           duration: 5000
         });
       } else {
         let errorMessage = 'Failed to send emergency alert. Please try again.';
-        
+
         if (error.message?.includes('Unauthorized')) {
           errorMessage = 'You are not authorized to send alerts. Please log in again.';
         } else if (error.message?.includes('inactive')) {
@@ -138,7 +138,7 @@ export default function SOSPanel() {
         } else if (error.message) {
           errorMessage = error.message;
         }
-        
+
         toast.error('Emergency Alert Failed', {
           description: errorMessage,
           duration: 7000,
@@ -149,7 +149,7 @@ export default function SOSPanel() {
 
   const processOfflineQueue = async () => {
     const queue = offlineQueueService.getQueue();
-    
+
     for (const event of queue) {
       try {
         await triggerAlert.mutateAsync({
@@ -157,21 +157,21 @@ export default function SOSPanel() {
           location: event.location,
           extraData: event.extraData,
         });
-        
+
         offlineQueueService.removeFromQueue(event.id);
-        toast.success('Queued alert sent', { 
-          description: `Alert from ${new Date(event.timestamp).toLocaleString()}` 
+        toast.success('Queued alert sent', {
+          description: `Alert from ${new Date(event.timestamp).toLocaleString()}`
         });
       } catch (error) {
         const canRetry = offlineQueueService.incrementRetry(event.id);
         if (!canRetry) {
-          toast.error('Failed to send queued alert', { 
-            description: 'Max retries exceeded' 
+          toast.error('Failed to send queued alert', {
+            description: 'Max retries exceeded'
           });
         }
       }
     }
-    
+
     setQueuedEvents(offlineQueueService.getQueueSize());
   };
 
@@ -245,9 +245,9 @@ export default function SOSPanel() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center gap-2">
-              <img 
-                src="/assets/generated/sos-button.dim_128x128.png" 
-                alt="Emergency SOS" 
+              <img
+                src="/assets/generated/sos-button.dim_128x128.png"
+                alt="Emergency SOS"
                 className="h-16 w-16 object-contain"
               />
               <span className="text-sm font-bold">SOS</span>

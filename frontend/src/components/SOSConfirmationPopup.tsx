@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, MapPin, Clock, Hash, Phone, AlertCircle, X } from 'lucide-react';
-import { SOSConfirmation } from '../backend';
+import { SOSConfirmation } from 'declarations/backend';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -68,8 +68,8 @@ export default function SOSConfirmationPopup({ confirmation, onClose }: SOSConfi
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent 
-        className="sm:max-w-md max-h-[90vh] overflow-y-auto" 
+      <DialogContent
+        className="sm:max-w-md max-h-[90vh] overflow-y-auto"
         aria-describedby="sos-confirmation-description"
         role="alertdialog"
         aria-live="assertive"
@@ -170,9 +170,9 @@ export default function SOSConfirmationPopup({ confirmation, onClose }: SOSConfi
         </div>
 
         <DialogFooter className="flex-col sm:flex-col gap-2">
-          <Button 
-            onClick={handleClose} 
-            className="w-full" 
+          <Button
+            onClick={handleClose}
+            className="w-full"
             size="lg"
             aria-label={`Acknowledge alert, auto-closing in ${autoCloseTimer} seconds`}
             autoFocus

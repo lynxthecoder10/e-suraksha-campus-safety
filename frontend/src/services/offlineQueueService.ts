@@ -1,5 +1,5 @@
 // Offline queue service for storing SOS events when offline
-import { SOSType, GeoLocation } from '../backend';
+import { SOSType, GeoLocation } from 'declarations/backend';
 
 export interface QueuedSOSEvent {
   id: string;
@@ -83,7 +83,7 @@ export class OfflineQueueService {
     if (!event) return false;
 
     event.retryCount++;
-    
+
     if (event.retryCount >= MAX_RETRY_COUNT) {
       this.removeFromQueue(eventId);
       return false;

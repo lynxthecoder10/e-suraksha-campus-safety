@@ -17,11 +17,11 @@ export default function AdminElevationPanel() {
   const [targetPrincipal, setTargetPrincipal] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  
+
   const addAdminAccess = useAddAdminAccess();
   const recoverAdminSession = useRecoverAdminSession();
   const { data: users = [] } = useGetAllUsers();
-  const { clear, identity } = useInternetIdentity();
+  const { logout: clear, identity } = useInternetIdentity();
   const queryClient = useQueryClient();
 
   const isAdmin = users.some(u => u.user.toText() === identity?.getPrincipal().toString() && u.role === 'admin');
@@ -30,7 +30,7 @@ export default function AdminElevationPanel() {
   const handleRecoverAdmin = async () => {
     try {
       const result = await recoverAdminSession.mutateAsync();
-      
+
       toast.success('Admin Session Recovered', {
         description: 'Emergency admin access has been restored. Please log in again.',
       });
@@ -43,7 +43,7 @@ export default function AdminElevationPanel() {
       }, 2000);
     } catch (error: any) {
       console.error('Admin recovery error:', error);
-      
+
       const errorMessage = error?.message || '';
       if (errorMessage.includes('Admin sessions exist')) {
         toast.error('Recovery Not Needed', {
@@ -63,7 +63,7 @@ export default function AdminElevationPanel() {
 
   const handleAddAdminClick = () => {
     const principal = targetPrincipal.trim() || selectedUser;
-    
+
     if (!principal) {
       toast.error('Please select or enter a user');
       return;
@@ -86,7 +86,7 @@ export default function AdminElevationPanel() {
 
   const confirmAddAdmin = async () => {
     const principal = targetPrincipal.trim() || selectedUser;
-    
+
     if (!principal) {
       toast.error('Please select or enter a user');
       return;
@@ -94,7 +94,7 @@ export default function AdminElevationPanel() {
 
     try {
       await addAdminAccess.mutateAsync(principal);
-      
+
       toast.success('Admin access granted', {
         description: `User ${principal.slice(0, 8)}...${principal.slice(-6)} has been granted admin privileges.`,
       });
@@ -104,7 +104,7 @@ export default function AdminElevationPanel() {
       setSelectedUser('');
     } catch (error: any) {
       console.error('Add admin error:', error);
-      
+
       const errorMessage = error?.message || '';
       if (errorMessage.includes('Unauthorized')) {
         toast.error('Access denied', {
@@ -227,10 +227,10 @@ export default function AdminElevationPanel() {
                       />
                     </div>
 
-                    <Button 
+                    <Button
                       type="button"
                       onClick={handleAddAdminClick}
-                      className="w-full" 
+                      className="w-full"
                       disabled={addAdminAccess.isPending || (!targetPrincipal.trim() && !selectedUser)}
                     >
                       {addAdminAccess.isPending ? 'Granting Access...' : 'Grant Admin Access'}
@@ -267,10 +267,10 @@ export default function AdminElevationPanel() {
                   </div>
                 </div>
 
-                <Button 
+                <Button
                   type="button"
                   onClick={handleRecoverAdmin}
-                  className="w-full" 
+                  className="w-full"
                   disabled={recoverAdminSession.isPending}
                   variant={adminCount === 0 ? 'default' : 'outline'}
                 >

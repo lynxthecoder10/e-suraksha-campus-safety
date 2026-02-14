@@ -2,16 +2,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
 import { Principal } from '@icp-sdk/core/principal';
-import type { 
-  UserProfile, 
-  SOSType, 
-  GeoLocation, 
-  UserRole, 
-  AlertStatus, 
-  EmergencyAlert, 
-  IncidentReport, 
-  FeedbackEntry, 
-  CrisisBrainPrediction, 
+import { supabase } from '../lib/supabase';
+import type {
+  UserProfile,
+  SOSType,
+  GeoLocation,
+  UserRole,
+  AlertStatus,
+  EmergencyAlert,
+  IncidentReport,
+  FeedbackEntry,
+  CrisisBrainPrediction,
   FeatureVerificationReport,
   UserRoleInfo,
   AuditLogEntry,
@@ -21,8 +22,8 @@ import type {
   Variant_closed_open_inProgress,
   LiveDeploymentInfo,
   SOSConfirmation
-} from '../backend';
-import { ExternalBlob } from '../backend';
+} from 'declarations/backend';
+import { ExternalBlob } from 'declarations/backend';
 
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -230,7 +231,7 @@ export function useValidateStoredSession() {
   return useMutation({
     mutationFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      
+
       // Create timeout promise
       const timeoutPromise = new Promise<boolean>((_, reject) => {
         setTimeout(() => reject(new Error('Session validation timeout')), 5000);
@@ -238,7 +239,7 @@ export function useValidateStoredSession() {
 
       // Race between validation and timeout
       const validationPromise = actor.validateStoredSession();
-      
+
       try {
         const result = await Promise.race([validationPromise, timeoutPromise]);
         return result;
@@ -347,13 +348,37 @@ export function useUpdateLiveDeploymentInfo() {
 }
 
 export function useTriggerAlert() {
-  const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ sosType, location, extraData }: { sosType: SOSType; location: GeoLocation; extraData: string | null }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.triggerAlert(sosType, location, extraData);
+      // Map frontend SOSType to string for DB
+      const typeString = Object.keys(sosType)[0];
+
+      // Insert into Supabase
+      const { data, error } = await supabase
+        .from('alerts')
+        .insert({
+          user_id: 'anonymous', // Replace with real user ID from Auth later
+          type: typeString,
+          status: 'active',
+          latitude: location.latitude,
+          longitude: location.longitude,
+          extra_data: extraData
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Construct confirmation object to match backend type
+      return {
+        alertId: BigInt(data.id),
+        timestamp: BigInt(Date.now()) * 1000000n,
+        location: location,
+        estimatedResponseTime: 5n, // Mock value
+        confirmationMessage: "Alert received. Dispatching security team."
+      };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activeAlerts'] });
@@ -389,15 +414,31 @@ export function useResolveAlert() {
 }
 
 export function useGetActiveAlerts() {
-  const { actor, isFetching: actorFetching } = useActor();
+  // Removed useActor since we are using Supabase
+  // const { actor, isFetching: actorFetching } = useActor(); 
 
   return useQuery<AlertStatus[]>({
     queryKey: ['activeAlerts'],
     queryFn: async () => {
-      if (!actor) return [];
-      return actor.getActiveAlerts();
+      // Fetch from Supabase
+      const { data, error } = await supabase
+        .from('alerts')
+        .select('*')
+        .eq('status', 'active');
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      // Map Supabase rows to the frontend AlertStatus type expected by components
+      return (data || []).map((row: any) => ({
+        status: { 'active': null }, // Motoko Variant
+        updatedAt: BigInt(new Date(row.updated_at).getTime()) * 1000000n, // Nano seconds
+        alertId: BigInt(row.id)
+      }));
     },
-    enabled: !!actor && !actorFetching,
+    // No actor dependency needed
     refetchInterval: 3000,
   });
 }
