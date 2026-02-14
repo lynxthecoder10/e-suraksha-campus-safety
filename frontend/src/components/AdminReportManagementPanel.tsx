@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { FileText, Eye, MessageSquare, Clock, User, AlertCircle } from 'lucide-react';
 import type { Variant_closed_open_inProgress } from 'declarations/backend';
+import { REPORT_STATUS, getStatusKey, getStatusLabel, createStatusFromString } from '../lib/backendTypes';
 
 export default function AdminReportManagementPanel() {
   const { data: reports = [], isLoading } = useGetHistoricalReports();
@@ -70,19 +71,20 @@ export default function AdminReportManagementPanel() {
   };
 
   const getStatusBadge = (status: Variant_closed_open_inProgress) => {
-    switch (status) {
-      case Variant_closed_open_inProgress.open:
+    const key = getStatusKey(status);
+    switch (key) {
+      case 'open':
         return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">Open</Badge>;
-      case Variant_closed_open_inProgress.inProgress:
+      case 'inProgress':
         return <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">In Progress</Badge>;
-      case Variant_closed_open_inProgress.closed:
+      case 'closed':
         return <Badge variant="outline" className="bg-success/10 text-success border-success/30">Closed</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge variant="outline">{getStatusLabel(status)}</Badge>;
     }
   };
 
-  const selectedReportData = reports.find(r => r.id === selectedReport);
+  const selectedReportData = reports.find(r => r.reportId === selectedReport);
 
   if (isLoading) {
     return (
@@ -139,10 +141,10 @@ export default function AdminReportManagementPanel() {
                   </TableRow>
                 ) : (
                   reports.map((report) => (
-                    <TableRow key={report.id.toString()}>
-                      <TableCell className="font-mono">#{report.id.toString()}</TableCell>
+                    <TableRow key={report.reportId.toString()}>
+                      <TableCell className="font-mono">#{report.reportId.toString()}</TableCell>
                       <TableCell className="font-mono text-xs">
-                        {report.user.toText().slice(0, 8)}...
+                        {report.reporterId.toText().slice(0, 8)}...
                       </TableCell>
                       <TableCell className="max-w-xs truncate">{report.description}</TableCell>
                       <TableCell>{getStatusBadge(report.status)}</TableCell>
@@ -151,7 +153,7 @@ export default function AdminReportManagementPanel() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleViewDetails(report.id)}
+                          onClick={() => handleViewDetails(report.reportId)}
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View
@@ -190,7 +192,7 @@ export default function AdminReportManagementPanel() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Report ID:</span>
-                      <p className="font-mono">#{selectedReportData.id.toString()}</p>
+                      <p className="font-mono">#{selectedReportData.reportId.toString()}</p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Status:</span>
@@ -198,7 +200,7 @@ export default function AdminReportManagementPanel() {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Submitted By:</span>
-                      <p className="font-mono text-xs">{selectedReportData.user.toText().slice(0, 16)}...</p>
+                      <p className="font-mono text-xs">{selectedReportData.reporterId.toText().slice(0, 16)}...</p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Date:</span>
@@ -234,11 +236,10 @@ export default function AdminReportManagementPanel() {
                         <div key={index} className="flex items-start gap-3 text-sm p-2 bg-muted/50 rounded">
                           <Clock className="h-4 w-4 mt-0.5 text-muted-foreground" />
                           <div className="flex-1">
-                            <p className="font-medium">{entry.status}</p>
+                            <p className="font-medium">{getStatusLabel(entry.status)}</p>
                             <p className="text-xs text-muted-foreground">
                               {new Date(Number(entry.timestamp) / 1000000).toLocaleString()}
                             </p>
-                            {entry.comment && <p className="text-xs mt-1">{entry.comment}</p>}
                           </div>
                         </div>
                       ))}
@@ -262,7 +263,7 @@ export default function AdminReportManagementPanel() {
                         <div key={index} className="flex items-start gap-3 text-sm p-3 bg-muted/50 rounded">
                           <User className="h-4 w-4 mt-0.5 text-muted-foreground" />
                           <div className="flex-1">
-                            <p>{comment.comment}</p>
+                            <p>{comment.content}</p>
                             <p className="text-xs text-muted-foreground mt-1">
                               {new Date(Number(comment.timestamp) / 1000000).toLocaleString()}
                             </p>
@@ -279,14 +280,14 @@ export default function AdminReportManagementPanel() {
                 <div className="space-y-3">
                   <Label>Update Status</Label>
                   <div className="flex gap-2">
-                    <Select value={newStatus || undefined} onValueChange={(value) => setNewStatus(value as Variant_closed_open_inProgress)}>
+                    <Select value={newStatus ? getStatusKey(newStatus) : undefined} onValueChange={(value) => setNewStatus(createStatusFromString(value))}>
                       <SelectTrigger className="flex-1">
                         <SelectValue placeholder="Select new status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={Variant_closed_open_inProgress.open}>Open</SelectItem>
-                        <SelectItem value={Variant_closed_open_inProgress.inProgress}>In Progress</SelectItem>
-                        <SelectItem value={Variant_closed_open_inProgress.closed}>Closed</SelectItem>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="inProgress">In Progress</SelectItem>
+                        <SelectItem value="closed">Closed</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button onClick={handleUpdateStatus} disabled={!newStatus || updateStatus.isPending}>

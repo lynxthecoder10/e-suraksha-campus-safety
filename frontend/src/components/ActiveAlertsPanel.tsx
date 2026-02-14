@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { AlertTriangle, Phone, Flame, HelpCircle, MapPin, Clock, CheckCircle } from 'lucide-react';
 import type { SOSType } from 'declarations/backend';
+import { getSOSTypeKey, getSOSTypeLabel } from '../lib/backendTypes';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 
 interface ActiveAlertsPanelProps {
@@ -27,12 +28,13 @@ export default function ActiveAlertsPanel({ isAdmin = false }: ActiveAlertsPanel
   };
 
   const getSOSIcon = (type: SOSType) => {
-    switch (type) {
-      case SOSType.medical:
+    const key = getSOSTypeKey(type);
+    switch (key) {
+      case 'medical':
         return <AlertTriangle className="h-5 w-5 text-destructive" />;
-      case SOSType.police:
+      case 'security':
         return <Phone className="h-5 w-5 text-chart-1" />;
-      case SOSType.fire:
+      case 'fire':
         return <Flame className="h-5 w-5 text-chart-4" />;
       default:
         return <HelpCircle className="h-5 w-5 text-chart-2" />;
@@ -40,16 +42,7 @@ export default function ActiveAlertsPanel({ isAdmin = false }: ActiveAlertsPanel
   };
 
   const getSOSLabel = (type: SOSType) => {
-    switch (type) {
-      case SOSType.medical:
-        return 'Medical';
-      case SOSType.police:
-        return 'Police';
-      case SOSType.fire:
-        return 'Fire';
-      default:
-        return 'Other';
-    }
+    return getSOSTypeLabel(type);
   };
 
   if (isLoading) {

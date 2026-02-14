@@ -3,6 +3,7 @@ import { useTriggerAlert } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import type { SOSType, SOSConfirmation } from 'declarations/backend';
+import { SOS_TYPES } from '../lib/backendTypes';
 import { Shield, MapPin, Loader2, CheckCircle, Wifi, WifiOff, Clock, MapPinned, Hash } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { locationService } from '../services/locationService';
@@ -91,7 +92,7 @@ export default function SOSPanel() {
       // Check if online
       if (!isOnline) {
         // Queue for later
-        const eventId = offlineQueueService.addToQueue(SOSType.other, currentLocation, null);
+        const eventId = offlineQueueService.addToQueue(SOS_TYPES.other, currentLocation, null);
         setQueuedEvents(offlineQueueService.getQueueSize());
         toast.warning('Offline - Event queued', {
           description: 'Alert will be sent when connection is restored',
@@ -102,7 +103,7 @@ export default function SOSPanel() {
 
       // Send alert immediately
       const confirmation = await triggerAlert.mutateAsync({
-        sosType: SOSType.other,
+        sosType: SOS_TYPES.other,
         location: currentLocation,
         extraData: null,
       });
@@ -122,7 +123,7 @@ export default function SOSPanel() {
 
       // Queue if network error
       if (error.message?.includes('network') || error.message?.includes('connection')) {
-        const eventId = offlineQueueService.addToQueue(SOSType.other, currentLocation, null);
+        const eventId = offlineQueueService.addToQueue(SOS_TYPES.other, currentLocation, null);
         setQueuedEvents(offlineQueueService.getQueueSize());
         toast.warning('Network error - Event queued', {
           description: 'Alert will be sent when connection is restored',
