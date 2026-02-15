@@ -10,6 +10,10 @@ import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/contacts/presentation/emergency_contacts_screen.dart';
 import '../../features/safety_resources/presentation/safety_guidelines_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
+import '../../features/admin/presentation/admin_dashboard_screen.dart';
+import '../../features/admin/presentation/admin_incidents_screen.dart';
+import '../../features/admin/presentation/admin_incident_detail_screen.dart';
+import '../../features/admin/presentation/admin_users_screen.dart';
 import 'scaffold_with_navbar.dart';
 import '../config/supabase_config.dart';
 
@@ -94,6 +98,29 @@ final appRouter = GoRouter(
     GoRoute(
        path: '/notifications',
        builder: (context, state) => const NotificationsScreen(),
+    ),
+    GoRoute(
+      path: '/admin',
+      builder: (context, state) => const AdminDashboardScreen(),
+      routes: [
+        GoRoute(
+          path: 'incidents',
+          builder: (context, state) => const AdminIncidentsScreen(),
+          routes: [
+            GoRoute(
+              path: 'detail',
+              builder: (context, state) {
+                final report = state.extra as Map<String, dynamic>;
+                return AdminIncidentDetailScreen(report: report);
+              },
+            ),
+          ],
+        ),
+        GoRoute(
+          path: 'users',
+          builder: (context, state) => const AdminUsersScreen(),
+        ),
+      ],
     ),
   ],
 );

@@ -107,6 +107,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
              ),
           ),
           
+          if (role == 'admin')
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton.icon(
+                onPressed: () => context.push('/admin'),
+                icon: const Icon(Icons.security),
+                label: const Text('Enter Admin Console'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade900,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ),
+          
           const SizedBox(height: 40),
           const Divider(),
           
