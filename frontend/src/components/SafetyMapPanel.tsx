@@ -63,7 +63,7 @@ export default function SafetyMapPanel() {
             <TabsContent value="evacuation" className="space-y-4">
               <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
                 <img
-                  src="/assets/generated/evacuation-routes-map.dim_800x600.png"
+                  src="/assets/generated/evacuation-routes-map.dim_800x600.svg"
                   alt="Evacuation Routes"
                   className="w-full h-full object-cover"
                 />

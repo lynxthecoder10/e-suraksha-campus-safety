@@ -196,6 +196,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       // Native Google Sign-In
                       final googleSignIn = GoogleSignIn(
                         serverClientId: SupabaseConfig.googleWebClientId,
+                        scopes: const ['email', 'profile'],
                       );
                       final googleUser = await googleSignIn.signIn();
                       

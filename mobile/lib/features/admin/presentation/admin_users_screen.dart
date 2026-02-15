@@ -30,7 +30,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       final response = await SupabaseConfig.client
           .from('profiles')
           .select('*')
-          .order('created_at', { 'ascending': false });
+          .order('created_at', ascending: false);
 
       setState(() {
         _users = List<Map<String, dynamic>>.from(response);
