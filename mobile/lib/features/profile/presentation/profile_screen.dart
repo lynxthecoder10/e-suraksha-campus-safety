@@ -111,6 +111,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const Divider(),
           
           ListTile(
+               leading: const Icon(Icons.contact_phone_outlined, color: Colors.green),
+               title: const Text('Emergency Contacts'),
+               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+               onTap: () => context.go('/profile/contacts'),
+          ),
+          ListTile(
+               leading: const Icon(Icons.health_and_safety_outlined, color: Colors.orange),
+               title: const Text('Safety Guidelines'),
+               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+               onTap: () => context.go('/profile/safety'),
+          ),
+          ListTile(
             leading: const Icon(Icons.notifications_outlined),
             title: const Text('Notifications'),
             trailing: Switch(value: true, onChanged: (val){}),

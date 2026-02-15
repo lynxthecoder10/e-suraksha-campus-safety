@@ -7,6 +7,9 @@ import '../../features/map/presentation/map_screen.dart';
 import '../../features/incidents/presentation/incidents_screen.dart';
 import '../../features/incidents/presentation/add_incident_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/contacts/presentation/emergency_contacts_screen.dart';
+import '../../features/safety_resources/presentation/safety_guidelines_screen.dart';
+import '../../features/notifications/presentation/notifications_screen.dart';
 import 'scaffold_with_navbar.dart';
 import '../config/supabase_config.dart';
 
@@ -73,10 +76,24 @@ final appRouter = GoRouter(
             GoRoute(
               path: '/profile',
               builder: (context, state) => const ProfileScreen(),
+              routes: [
+                GoRoute(
+                  path: 'contacts',
+                  builder: (context, state) => const EmergencyContactsScreen(),
+                ),
+                GoRoute(
+                  path: 'safety',
+                  builder: (context, state) => const SafetyGuidelinesScreen(),
+                ),
+              ],
             ),
           ],
         ),
       ],
+    ),
+    GoRoute(
+       path: '/notifications',
+       builder: (context, state) => const NotificationsScreen(),
     ),
   ],
 );

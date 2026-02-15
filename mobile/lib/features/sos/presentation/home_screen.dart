@@ -108,6 +108,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ],
                     ),
                   ),
+                  IconButton(
+                    onPressed: () => context.push('/notifications'),
+                    icon: const Icon(Icons.notifications_outlined),
+                  ),
                 ],
               ),
             ),
