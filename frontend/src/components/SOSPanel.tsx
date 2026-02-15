@@ -247,7 +247,7 @@ export default function SOSPanel() {
           ) : (
             <div className="flex flex-col items-center justify-center gap-2">
               <img
-                src="/assets/generated/sos-button.dim_128x128.png"
+                src="/assets/generated/sos.svg"
                 alt="Emergency SOS"
                 className="h-16 w-16 object-contain"
               />
