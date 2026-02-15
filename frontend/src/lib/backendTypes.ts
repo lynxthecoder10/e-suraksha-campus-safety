@@ -1,7 +1,13 @@
 // Utility helpers for working with backend discriminated union types
 // These are runtime values that match the TypeScript types from declarations/backend
 
-import type { SOSType, Variant_closed_open_inProgress } from 'declarations/backend';
+import type { SOSType, Variant_closed_open_inProgress, FeedbackEntry } from 'declarations/backend';
+
+// Extended definitions to include Supabase fields
+export interface ExtendedFeedbackEntry extends Omit<FeedbackEntry, 'timestamp'> {
+    id: bigint;
+    timestamp: bigint;
+}
 
 // SOS Type constants (discriminated union values)
 export const SOS_TYPES = {

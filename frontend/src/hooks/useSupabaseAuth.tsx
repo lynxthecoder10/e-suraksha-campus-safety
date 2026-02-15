@@ -9,6 +9,9 @@ interface SupabaseAuthContextType {
     isAuthenticated: boolean;
     isInitializing: boolean;
     login: (email: string) => Promise<void>;
+    signInWithPassword: (email: string, password: string) => Promise<void>;
+    signUpWithPassword: (email: string, password: string, fullName: string) => Promise<void>;
+    signInWithGoogle: () => Promise<void>;
     verifyOtp: (email: string, token: string) => Promise<void>;
     logout: () => Promise<void>;
 }
@@ -71,6 +74,59 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const signInWithPassword = async (email: string, password: string) => {
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+            if (error) throw error;
+            toast.success('Logged in successfully');
+        } catch (error: any) {
+            console.error('Login error:', error);
+            toast.error('Login failed', { description: error.message });
+            throw error;
+        }
+    };
+
+    const signUpWithPassword = async (email: string, password: string, fullName: string) => {
+        try {
+            const { error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: fullName,
+                    },
+                },
+            });
+            if (error) throw error;
+            toast.success('Account created!', {
+                description: 'Please check your email to confirm your account.',
+            });
+        } catch (error: any) {
+            console.error('Signup error:', error);
+            toast.error('Signup failed', { description: error.message });
+            throw error;
+        }
+    };
+
+    const signInWithGoogle = async () => {
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin,
+                },
+            });
+            if (error) throw error;
+        } catch (error: any) {
+            console.error('Google login error:', error);
+            toast.error('Google login failed', { description: error.message });
+            throw error;
+        }
+    };
+
     const verifyOtp = async (email: string, token: string) => {
         try {
             const { error } = await supabase.auth.verifyOtp({
@@ -106,6 +162,9 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated: !!user,
         isInitializing,
         login,
+        signInWithPassword,
+        signUpWithPassword,
+        signInWithGoogle,
         verifyOtp,
         logout,
     };

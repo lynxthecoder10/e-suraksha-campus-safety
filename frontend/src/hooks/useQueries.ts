@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 // import { useInternetIdentity } from './useInternetIdentity'; // Removed
 import { useSupabaseAuth } from './useSupabaseAuth';
 import { Principal } from '@icp-sdk/core/principal';
+import { ExtendedFeedbackEntry } from '@/lib/backendTypes';
 import { supabase } from '../lib/supabase';
 import type {
   UserProfile,
@@ -439,7 +440,7 @@ export function useSubmitFeedback() {
 export function useGetAllFeedback() {
   // const { actor } = useActor();
 
-  return useQuery<FeedbackEntry[]>({
+  return useQuery<ExtendedFeedbackEntry[]>({
     queryKey: ['allFeedback'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -450,6 +451,7 @@ export function useGetAllFeedback() {
       if (error) return [];
 
       return (data || []).map((row: any) => ({
+        id: BigInt(row.id),
         userId: { toText: () => row.user_id, _isPrincipal: true } as any,
         message: row.message,
         rating: BigInt(row.rating),

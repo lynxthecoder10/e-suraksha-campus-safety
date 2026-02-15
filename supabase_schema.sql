@@ -104,8 +104,37 @@ BEGIN
   VALUES (new.id, new.raw_user_meta_data->>'full_name', 'user');
   RETURN new;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- Audit Logs: Admins view all, System inserts (via triggers mostly, but allow auth for now)
+CREATE POLICY "Admins view audit logs" ON public.audit_logs FOR SELECT USING (true); -- TODO: Restrict to admin role
+CREATE POLICY "Auth users insert audit logs" ON public.audit_logs FOR INSERT WITH CHECK (auth.uid() = admin_id);
+
+-- Feedback: Public insert (or auth), Admins view
+CREATE POLICY "Users insert feedback" ON public.feedback FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Admins view feedback" ON public.feedback FOR SELECT USING (true); -- TODO: Restrict to admin role
+
+-- Report Comments: Users view/insert for their own reports or if they are admin
+-- Simplified: Auth users can view all comments (collaborative) or just their own.
+-- Let's allow users to view comments on reports they own.
+CREATE POLICY "Users view comments on own reports" 
+ON public.report_comments FOR SELECT 
+USING (
+  EXISTS (
+    SELECT 1 FROM public.incident_reports 
+    WHERE id = report_comments.report_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users insert comments on own reports" 
+ON public.report_comments FOR INSERT 
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.incident_reports 
+    WHERE id = report_comments.report_id AND user_id = auth.uid()
+  )
+);
+
