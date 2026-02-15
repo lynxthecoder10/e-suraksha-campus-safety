@@ -28,6 +28,10 @@ export function useSubscribeToAlerts() {
                             onClick: () => window.scrollTo(0, 0),
                         },
                     });
+
+                    // Play Siren Sound
+                    const audio = new Audio('/assets/sounds/siren.mp3'); // We will ensure this exists or use a fallback
+                    audio.play().catch(e => console.log('Audio play failed (interaction required)', e));
                 }
             )
             .subscribe();

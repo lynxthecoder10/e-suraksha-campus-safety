@@ -13,9 +13,14 @@ import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useSubscribeToAlerts, useSubscribeToReports } from './hooks/useRealtime';
 
 function AppContent() {
   const { user, session, isInitializing } = useSupabaseAuth();
+
+  // Global Real-time Subscriptions
+  useSubscribeToAlerts();
+  useSubscribeToReports();
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 

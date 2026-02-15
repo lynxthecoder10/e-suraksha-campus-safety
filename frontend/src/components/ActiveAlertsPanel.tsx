@@ -1,5 +1,4 @@
 import { useGetActiveAlerts, useResolveAlert } from '../hooks/useQueries';
-import { useSubscribeToAlerts, useSubscribeToReports } from '../hooks/useRealtime';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +13,7 @@ interface ActiveAlertsPanelProps {
 }
 
 export default function ActiveAlertsPanel({ isAdmin = false }: ActiveAlertsPanelProps) {
-  useSubscribeToAlerts(); // Enable real-time alerts
-  useSubscribeToReports(); // Enable real-time reports
+  // Subscriptions are now handled globally in App.tsx
   const { data: alerts, isLoading } = useGetActiveAlerts();
   const resolveAlert = useResolveAlert();
   const { user } = useSupabaseAuth();
