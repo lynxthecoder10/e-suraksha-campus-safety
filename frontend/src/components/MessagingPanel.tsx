@@ -110,7 +110,7 @@ export default function MessagingPanel({ isAdmin = false }: MessagingPanelProps)
                 className={`flex gap-3 ${message.isResponder ? 'flex-row' : 'flex-row-reverse'}`}
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={message.isResponder ? '/assets/generated/responder-avatar.dim_100x100.png' : undefined} />
+                  <AvatarImage src={message.isResponder ? '/assets/generated/responder-avatar.dim_100x100.svg' : undefined} />
                   <AvatarFallback>
                     {message.isResponder ? <Shield className="h-4 w-4" /> : 'U'}
                   </AvatarFallback>

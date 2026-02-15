@@ -118,7 +118,7 @@ export default function ResponderManagementPanel() {
               >
                 <div className="flex items-center gap-4 flex-1">
                   <Avatar>
-                    <AvatarImage src="/assets/generated/responder-avatar.dim_100x100.png" />
+                    <AvatarImage src="/assets/generated/responder-avatar.dim_100x100.svg" />
                     <AvatarFallback>
                       {responder.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>

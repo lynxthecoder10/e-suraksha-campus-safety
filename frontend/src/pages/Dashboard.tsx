@@ -98,7 +98,7 @@ export default function Dashboard() {
           <CardContent className="pt-0 pb-6 px-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 -mt-12 relative z-10">
               <Avatar className="h-24 w-24 border-4 border-background shadow-xl ring-2 ring-primary/20">
-                <AvatarImage src={userProfile?.profilePhoto?.[0] || "/assets/generated/student-avatar-placeholder.dim_100x100.png"} alt={userName} />
+                <AvatarImage src={userProfile?.profilePhoto?.[0] || "/assets/generated/student-avatar-placeholder.dim_100x100.svg"} alt={userName} />
                 <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
                   {userInitials}
                 </AvatarFallback>

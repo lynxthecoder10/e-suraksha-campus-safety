@@ -37,8 +37,8 @@ export default function SafetyMapPanel() {
 
             <TabsContent value="heatmap" className="space-y-4">
               <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-                <img 
-                  src="/assets/generated/incident-heatmap-overlay.dim_500x400.png" 
+                <img
+                  src="/assets/generated/incident-heatmap-overlay.dim_500x400.svg"
                   alt="Incident Heat Map"
                   className="w-full h-full object-cover"
                 />
@@ -62,8 +62,8 @@ export default function SafetyMapPanel() {
 
             <TabsContent value="evacuation" className="space-y-4">
               <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-                <img 
-                  src="/assets/generated/evacuation-routes-map.dim_800x600.png" 
+                <img
+                  src="/assets/generated/evacuation-routes-map.dim_800x600.png"
                   alt="Evacuation Routes"
                   className="w-full h-full object-cover"
                 />

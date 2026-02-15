@@ -41,8 +41,8 @@ export default function IoTDevicesPanel() {
       </CardHeader>
       <CardContent>
         <div className="relative mb-6">
-          <img 
-            src="/assets/generated/iot-campus-devices.dim_800x300.png" 
+          <img
+            src="/assets/generated/iot-campus-devices.dim_800x300.svg"
             alt="IoT Campus Devices"
             className="w-full h-48 object-cover rounded-lg"
           />

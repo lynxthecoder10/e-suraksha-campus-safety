@@ -69,8 +69,8 @@ export default function BLEStatusPanel() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative">
-          <img 
-            src="/assets/generated/ble-mesh-network.dim_600x400.png" 
+          <img
+            src="/assets/generated/ble-mesh-network.dim_600x400.svg"
             alt="BLE Mesh Network"
             className="w-full h-48 object-cover rounded-lg"
           />

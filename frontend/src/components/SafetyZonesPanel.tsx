@@ -87,8 +87,8 @@ export default function SafetyZonesPanel() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-            <img 
-              src="/assets/generated/safety-zones-interface.dim_600x400.png" 
+            <img
+              src="/assets/generated/safety-zones-interface.dim_600x400.svg"
               alt="Safety Zones Map"
               className="w-full h-full object-cover"
             />

@@ -83,8 +83,8 @@ export default function PrivacyConsentDialog({
         <ScrollArea className="max-h-[400px] pr-4">
           <div className="space-y-6">
             <div className="relative p-4 bg-muted rounded-lg">
-              <img 
-                src="/assets/generated/privacy-consent-dialog.dim_500x400.png" 
+              <img
+                src="/assets/generated/privacy-consent-dialog.dim_500x400.svg"
                 alt="Privacy Illustration"
                 className="w-full h-32 object-cover rounded-lg mb-4"
               />

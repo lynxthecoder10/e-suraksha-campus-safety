@@ -93,7 +93,7 @@ export default function UserProfilePanel() {
         <CardContent className="pt-6">
           <div className="flex items-center gap-6">
             <Avatar className="h-24 w-24 border-4 border-primary/20">
-              <AvatarImage src={userProfile?.profilePhoto?.[0] || "/assets/generated/student-avatar-placeholder.dim_100x100.png"} alt={name} />
+              <AvatarImage src={userProfile?.profilePhoto?.[0] || "/assets/generated/student-avatar-placeholder.dim_100x100.svg"} alt={name} />
               <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
                 {getInitials(name || 'User')}
               </AvatarFallback>

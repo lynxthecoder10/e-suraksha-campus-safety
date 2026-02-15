@@ -138,7 +138,7 @@ export default function DigitalIDPanel() {
           <div className="text-center py-12 space-y-4">
             <div className="relative w-64 h-64 mx-auto bg-muted rounded-lg overflow-hidden">
               <img
-                src="/assets/generated/digital-id-template.dim_400x250.png"
+                src="/assets/generated/digital-id-template.dim_400x250.svg"
                 alt="Digital ID Template"
                 className="w-full h-full object-cover opacity-50"
               />
