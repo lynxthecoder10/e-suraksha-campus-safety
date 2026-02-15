@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:e_suraksha_mobile/core/config/supabase_config.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -190,11 +191,39 @@ class _AuthScreenState extends State<AuthScreen> {
                 
                 OutlinedButton.icon(
                   onPressed: () async {
+                    setState(() => _isLoading = true);
                     try {
-                      await SupabaseConfig.client.auth.signInWithOAuth(
-                        OAuthProvider.google,
-                        redirectTo: 'io.supabase.flutterquickstart://login-callback/',
+                      // Native Google Sign-In
+                      final googleSignIn = GoogleSignIn(
+                        serverClientId: SupabaseConfig.googleWebClientId,
                       );
+                      final googleUser = await googleSignIn.signIn();
+                      
+                      if (googleUser == null) {
+                         // User cancelled
+                         setState(() => _isLoading = false);
+                         return; 
+                      }
+                      
+                      final googleAuth = await googleUser.authentication;
+                      final accessToken = googleAuth.accessToken;
+                      final idToken = googleAuth.idToken;
+
+                      if (accessToken == null) {
+                        throw 'No Access Token found.';
+                      }
+                      if (idToken == null) {
+                        throw 'No ID Token found.';
+                      }
+
+                      await SupabaseConfig.client.auth.signInWithIdToken(
+                        provider: OAuthProvider.google,
+                        idToken: idToken,
+                        accessToken: accessToken,
+                      );
+                      
+                      // Success (Auth state change will handle navigation)
+                      
                     } catch (error) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -203,6 +232,8 @@ class _AuthScreenState extends State<AuthScreen> {
                               backgroundColor: Theme.of(context).colorScheme.error),
                         );
                       }
+                    } finally {
+                      if (mounted) setState(() => _isLoading = false);
                     }
                   },
                   icon: const Icon(Icons.login),
@@ -215,4 +246,4 @@ class _AuthScreenState extends State<AuthScreen> {
       ),
     );
   }
-}    
+}

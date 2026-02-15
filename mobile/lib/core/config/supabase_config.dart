@@ -4,6 +4,7 @@ class SupabaseConfig {
   static const String url = 'https://nhagzwbdryxqhwbhfskg.supabase.co';
   
   static const String anonKey = 'sb_publishable_xf2W52mpZkLPQBItk6Mksw_DStd30Tn';
+  static const String googleWebClientId = '441889867286-o0kj82olrih5ja7qjvf4efirvhcukm6m.apps.googleusercontent.com';
   
   static Future<void> initialize() async {
     await Supabase.initialize(
