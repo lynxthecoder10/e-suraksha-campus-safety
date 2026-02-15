@@ -14,6 +14,7 @@ import { ThemeProvider } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useSubscribeToAlerts, useSubscribeToReports } from './hooks/useRealtime';
+import AuthCallback from './pages/AuthCallback';
 
 function AppContent() {
   const { user, session, isInitializing } = useSupabaseAuth();
@@ -55,9 +56,15 @@ function AppContent() {
         <Header />
         <main className="flex-1">
           <Routes>
+
+
             {/* Public/Auth Routes */}
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+
+            {/* OAuth Callback Handlers (Handle potentially malformed redirects) */}
+            <Route path="/oauth/consent" element={<AuthCallback />} />
+            <Route path="//oauth/consent" element={<AuthCallback />} />
 
             {/* Main App Routes */}
             <Route path="/" element={
