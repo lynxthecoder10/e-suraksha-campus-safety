@@ -2,6 +2,8 @@ import { useSupabaseAuth, SupabaseAuthProvider } from './hooks/useSupabaseAuth';
 import LoginPrompt from './components/LoginPrompt';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
+import RequireAdmin from './components/RequireAdmin';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ProfileSetupModal from './components/ProfileSetupModal';
@@ -9,16 +11,11 @@ import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from 'next-themes';
-import { useGetCallerUserProfile } from './hooks/useQueries'; // We will update this later to fetch from Supabase
 import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 function AppContent() {
   const { user, session, isInitializing } = useSupabaseAuth();
-
-  // Temporary: Fetch profile using new hook once we update useQueries. 
-  // For now, we rely on Supabase session user metadata or profile table.
-  // We'll update useQueries in the next step.
-  // const { data: userProfile } = useGetCallerUserProfile(); 
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -43,36 +40,48 @@ function AppContent() {
     );
   }
 
-  if (!session || !user) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1">
-          <LoginPrompt />
-        </main>
-        <Footer />
-        <PWAInstallPrompt />
-        <Toaster />
-      </div>
-    );
-  }
-
-  // Determine role from profile (to be implemented fully with RLS)
-  // For now, assume 'user' or check metadata if we set it there.
-  const userRole: string = 'user'; // Default for now
+  // If not authenticated, we only show public routes (like admin login) or the main login prompt
+  // But wait, we want /admin/login to be accessible even if not logged in as a student.
+  // And the main "/" should show LoginPrompt if not logged in.
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      <main className="flex-1">
-        {/* Simple role check for now, will enhance with profile data later */}
-        {userRole === 'admin' ? <AdminDashboard /> : <Dashboard />}
-      </main>
-      <Footer />
-      <ProfileSetupModal />
-      <PWAInstallPrompt />
-      <OfflineIndicator />
-      <Toaster />
+      <BrowserRouter>
+        <Header />
+        <main className="flex-1">
+          <Routes>
+            {/* Public/Auth Routes */}
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+
+            {/* Main App Routes */}
+            <Route path="/" element={
+              session && user ? <Dashboard /> : <LoginPrompt />
+            } />
+            <Route path="/dashboard" element={
+              session && user ? <Dashboard /> : <Navigate to="/" />
+            } />
+
+            {/* Protected Admin Routes */}
+            <Route
+              path="/admin-dashboard"
+              element={
+                <RequireAdmin>
+                  <AdminDashboard />
+                </RequireAdmin>
+              }
+            />
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+        <Footer />
+        <ProfileSetupModal />
+        <PWAInstallPrompt />
+        <OfflineIndicator />
+        <Toaster />
+      </BrowserRouter>
     </div>
   );
 }
