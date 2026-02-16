@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield, AlertTriangle, MapPin, Activity, Loader2, Mail } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 export default function LoginPrompt() {
   const { login, signInWithPassword, signUpWithPassword, signInWithGoogle } = useSupabaseAuth();
@@ -29,6 +30,18 @@ export default function LoginPrompt() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    // Strong Password Validation
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]{8,}$/;
+
+    if (!strongPasswordRegex.test(password)) {
+      toast.error('Weak Password', {
+        description: 'Password must be at least 8 chars and include uppercase, lowercase, number, and symbol.'
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await signUpWithPassword(email, password, fullName);
     } catch (error) {
