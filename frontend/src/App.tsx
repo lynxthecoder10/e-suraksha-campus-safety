@@ -62,14 +62,9 @@ function AppContent() {
           <Routes>
 
 
-            {/* Secret Admin Routes (Keyword: Tejas) */}
-            <Route path="/tejas" element={<Navigate to="/tejas/login" replace />} />
-            <Route path="/tejas/login" element={<AdminLogin />} />
-            <Route path="/tejas/signup" element={<AdminSignup />} />
-
-            {/* Legacy/Standard Admin Limit - Redirect to Home or Fake 404 in future */}
-            <Route path="/admin" element={<Navigate to="/" replace />} />
-            <Route path="/admin/login" element={<Navigate to="/" replace />} />
+            {/* Admin Routes */}
+            <Route path="/admin" element={<Navigate to="/admin/login" replace />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* OAuth Callback Handlers (Handle potentially malformed redirects) */}
             <Route path="/oauth/consent" element={<AuthCallback />} />
