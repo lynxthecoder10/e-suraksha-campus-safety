@@ -151,11 +151,7 @@ export default function AdminLogin() {
             <a href="#" className="hover:text-slate-300 transition-colors">Forgot Credentials?</a>
           </div>
 
-          <div className="text-center text-xs text-slate-600 mt-4">
-            <Link to="/tejas/signup" className="hover:text-red-500 transition-colors">
-              Initialize New Command Profile
-            </Link>
-          </div>
+
         </div>
       </div>
     </div>
