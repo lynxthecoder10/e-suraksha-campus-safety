@@ -3,6 +3,7 @@ import LoginPrompt from './components/LoginPrompt';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
+import PendingApproval from './pages/PendingApproval';
 import RequireAdmin from './components/RequireAdmin';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -17,7 +18,7 @@ import { useSubscribeToAlerts, useSubscribeToReports } from './hooks/useRealtime
 import AuthCallback from './pages/AuthCallback';
 
 function AppContent() {
-  const { user, session, isInitializing } = useSupabaseAuth();
+  const { user, session, isInitializing, profile } = useSupabaseAuth();
 
   // Global Real-time Subscriptions
   useSubscribeToAlerts();
@@ -46,9 +47,12 @@ function AppContent() {
     );
   }
 
-  // If not authenticated, we only show public routes (like admin login) or the main login prompt
-  // But wait, we want /admin/login to be accessible even if not logged in as a student.
-  // And the main "/" should show LoginPrompt if not logged in.
+  // Helper to determine main content
+  const getMainElement = () => {
+    if (!session || !user) return <LoginPrompt />;
+    if (profile?.status === 'pending') return <Navigate to="/pending-approval" replace />;
+    return <Dashboard />;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -67,11 +71,16 @@ function AppContent() {
             <Route path="//oauth/consent" element={<AuthCallback />} />
 
             {/* Main App Routes */}
-            <Route path="/" element={
-              session && user ? <Dashboard /> : <LoginPrompt />
+            <Route path="/" element={getMainElement()} />
+
+            <Route path="/pending-approval" element={
+              session && user ? <PendingApproval /> : <Navigate to="/" />
             } />
+
             <Route path="/dashboard" element={
-              session && user ? <Dashboard /> : <Navigate to="/" />
+              session && user ? (
+                profile?.status === 'pending' ? <Navigate to="/pending-approval" /> : <Dashboard />
+              ) : <Navigate to="/" />
             } />
 
             {/* Protected Admin Routes */}

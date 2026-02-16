@@ -3,9 +3,17 @@ import { supabase } from '../lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 
+interface UserProfile {
+    id: string;
+    role: string;
+    status: string;
+    name?: string;
+}
+
 interface SupabaseAuthContextType {
     user: User | null;
     session: Session | null;
+    profile: UserProfile | null;
     isAuthenticated: boolean;
     isInitializing: boolean;
     login: (email: string) => Promise<void>;
@@ -14,6 +22,7 @@ interface SupabaseAuthContextType {
     signInWithGoogle: () => Promise<void>;
     verifyOtp: (email: string, token: string) => Promise<void>;
     logout: () => Promise<void>;
+    refreshProfile: () => Promise<void>;
 }
 
 const SupabaseAuthContext = createContext<SupabaseAuthContextType | null>(null);
@@ -29,13 +38,36 @@ export const useSupabaseAuth = () => {
 export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
+    const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
+
+    const fetchProfile = async (userId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error) {
+                console.error('Error fetching profile:', error);
+                // Don't throw, just set profile to null/partial
+                return;
+            }
+            setProfile(data);
+        } catch (error) {
+            console.error('Profile fetch exception:', error);
+        }
+    };
 
     useEffect(() => {
         // Check active session
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             setUser(session?.user ?? null);
+            if (session?.user) {
+                fetchProfile(session.user.id);
+            }
             setIsInitializing(false);
         });
 
@@ -45,11 +77,22 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
         } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
             setUser(session?.user ?? null);
+            if (session?.user) {
+                fetchProfile(session.user.id);
+            } else {
+                setProfile(null);
+            }
             setIsInitializing(false);
         });
 
         return () => subscription.unsubscribe();
     }, []);
+
+    const refreshProfile = async () => {
+        if (user) {
+            await fetchProfile(user.id);
+        }
+    };
 
     const login = async (email: string) => {
         try {
@@ -147,6 +190,7 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
+            setProfile(null);
             toast.success('Logged out successfully');
         } catch (error: any) {
             console.error('Logout error:', error);
@@ -159,6 +203,7 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
     const value = {
         user,
         session,
+        profile,
         isAuthenticated: !!user,
         isInitializing,
         login,
@@ -167,6 +212,7 @@ export const SupabaseAuthProvider = ({ children }: { children: ReactNode }) => {
         signInWithGoogle,
         verifyOtp,
         logout,
+        refreshProfile,
     };
 
     return (
