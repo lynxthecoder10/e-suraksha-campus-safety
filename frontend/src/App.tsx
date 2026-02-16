@@ -3,6 +3,7 @@ import LoginPrompt from './components/LoginPrompt';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
+import AdminSignup from './pages/AdminSignup';
 import PendingApproval from './pages/PendingApproval';
 import RequireAdmin from './components/RequireAdmin';
 import Header from './components/Header';
@@ -62,9 +63,14 @@ function AppContent() {
           <Routes>
 
 
-            {/* Public/Auth Routes */}
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
+            {/* Secret Admin Routes (Keyword: Tejas) */}
+            <Route path="/tejas" element={<Navigate to="/tejas/login" replace />} />
+            <Route path="/tejas/login" element={<AdminLogin />} />
+            <Route path="/tejas/signup" element={<AdminSignup />} />
+
+            {/* Legacy/Standard Admin Limit - Redirect to Home or Fake 404 in future */}
+            <Route path="/admin" element={<Navigate to="/" replace />} />
+            <Route path="/admin/login" element={<Navigate to="/" replace />} />
 
             {/* OAuth Callback Handlers (Handle potentially malformed redirects) */}
             <Route path="/oauth/consent" element={<AuthCallback />} />

@@ -13,7 +13,7 @@ export default function RequireAdmin({ children }: { children: React.ReactNode }
             if (isInitializing) return;
 
             if (!user) {
-                navigate('/admin/login');
+                navigate('/tejas/login');
                 return;
             }
 

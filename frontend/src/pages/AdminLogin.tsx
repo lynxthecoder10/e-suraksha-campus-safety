@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ShieldAlert, Lock, UserCog, CheckCircle2, Globe2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -149,6 +149,12 @@ export default function AdminLogin() {
               <span>Safe Environment</span>
             </div>
             <a href="#" className="hover:text-slate-300 transition-colors">Forgot Credentials?</a>
+          </div>
+
+          <div className="text-center text-xs text-slate-600 mt-4">
+            <Link to="/tejas/signup" className="hover:text-red-500 transition-colors">
+              Initialize New Command Profile
+            </Link>
           </div>
         </div>
       </div>
