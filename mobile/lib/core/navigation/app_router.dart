@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/presentation/auth_screen.dart';
+import '../../features/auth/presentation/pending_approval_screen.dart';
 import '../../features/sos/presentation/home_screen.dart';
 import '../../features/map/presentation/map_screen.dart';
 import '../../features/incidents/presentation/incidents_screen.dart';
@@ -41,6 +42,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/auth',
       builder: (context, state) => const AuthScreen(),
+    ),
+    GoRoute(
+      path: '/pending',
+      builder: (context, state) => const PendingApprovalScreen(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {

@@ -41,9 +41,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             .eq('id', user.id)
             .maybeSingle();
         if (mounted) {
-          setState(() {
             _profile = data;
           });
+          
+          if (data?['status'] == 'pending') {
+            if (mounted) context.go('/pending');
+          }
         }
       }
     } catch (e) {
