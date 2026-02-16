@@ -43,7 +43,7 @@ export default function LoginPrompt() {
       <div className="max-w-4xl w-full space-y-12">
         <div className="text-center space-y-4">
           <img
-            src="/assets/generated/campus-shield-logo.png"
+            src="/assets/generated/campus-shield-logo.png?v=1"
             alt="E-Suraksha"
             className="h-24 w-24 mx-auto"
           />

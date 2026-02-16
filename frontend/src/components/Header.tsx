@@ -25,7 +25,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src="/assets/generated/campus-shield-logo.png" alt="E-Suraksha Logo" className="h-10 w-10" />
+          <img src="/assets/generated/campus-shield-logo.png?v=1" alt="E-Suraksha Logo" className="h-10 w-10" />
           <div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
               E-Suraksha
