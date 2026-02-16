@@ -148,7 +148,8 @@ export default function ProfileSetupModal() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Student">Student</SelectItem>
-                <SelectItem value="Admin">Admin</SelectItem>
+                <SelectItem value="Student">Student</SelectItem>
+                {/* Admin role must be created via secret route */}
                 <SelectItem value="Security">Security</SelectItem>
                 <SelectItem value="Faculty">Faculty</SelectItem>
               </SelectContent>
