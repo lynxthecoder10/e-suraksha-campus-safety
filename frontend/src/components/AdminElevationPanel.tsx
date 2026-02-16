@@ -61,6 +61,31 @@ export default function AdminElevationPanel() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="p-4 bg-muted/50 rounded-lg border border-dashed space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Info className="h-4 w-4" />
+              <span>Share Admin Portal</span>
+            </div>
+            <div className="flex gap-2">
+              <code className="flex-1 p-2 bg-background rounded border text-xs font-mono flex items-center">
+                {window.location.origin}/admin/login
+              </code>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/admin/login`);
+                  toast.success('Link copied to clipboard');
+                }}
+              >
+                Copy
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Share this link with users. Once they sign up/login, you can find them in the list below to promote them.
+            </p>
+          </div>
+
           {!isAdmin ? (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
