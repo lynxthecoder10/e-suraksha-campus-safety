@@ -16,6 +16,7 @@ import '../../features/admin/presentation/admin_incident_detail_screen.dart';
 import '../../features/admin/presentation/admin_users_screen.dart';
 import 'scaffold_with_navbar.dart';
 import '../config/supabase_config.dart';
+import 'go_router_refresh_stream.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -23,6 +24,7 @@ final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>()
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/home',
+  refreshListenable: GoRouterRefreshStream(SupabaseConfig.client.auth.onAuthStateChange),
   redirect: (context, state) {
     final session = SupabaseConfig.client.auth.currentSession;
     final isLoggingIn = state.uri.toString() == '/auth';

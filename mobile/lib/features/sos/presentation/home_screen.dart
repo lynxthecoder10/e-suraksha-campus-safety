@@ -12,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  Map<String, dynamic>? _profile;
   
   final _alertsStream = SupabaseConfig.client
       .from('alerts')
@@ -27,6 +28,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
        vsync: this,
        duration: const Duration(seconds: 2),
      )..repeat(reverse: true);
+     _fetchProfile();
+  }
+
+  Future<void> _fetchProfile() async {
+    try {
+      final user = SupabaseConfig.client.auth.currentUser;
+      if (user != null) {
+        final data = await SupabaseConfig.client
+            .from('profiles')
+            .select()
+            .eq('id', user.id)
+            .maybeSingle();
+        if (mounted) {
+          setState(() {
+            _profile = data;
+          });
+        }
+      }
+    } catch (e) {
+      // Silent error for UI enhancement
+    }
   }
 
   @override
@@ -62,6 +84,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final isAdmin = _profile?['role'] == 'admin';
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -90,27 +114,46 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade100,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.bluetooth, size: 16, color: Colors.green),
-                        const SizedBox(width: 4),
-                        Text('MESH: ON', style: TextStyle(
-                          fontSize: 12, 
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green.shade900
-                        )),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => context.push('/notifications'),
-                    icon: const Icon(Icons.notifications_outlined),
+                  Row(
+                    children: [
+                      if (isAdmin)
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.red.shade200),
+                          ),
+                          child: IconButton(
+                            icon: Icon(Icons.security, color: Colors.red.shade800),
+                            tooltip: 'Admin Console',
+                            onPressed: () => context.push('/admin'),
+                          ),
+                        ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade100,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.bluetooth, size: 16, color: Colors.green),
+                            const SizedBox(width: 4),
+                            Text('MESH: ON', style: TextStyle(
+                              fontSize: 12, 
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade900
+                            )),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () => context.push('/notifications'),
+                        icon: const Icon(Icons.notifications_outlined),
+                      ),
+                    ],
                   ),
                 ],
               ),
