@@ -3,7 +3,6 @@ import LoginPrompt from './components/LoginPrompt';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
-import AdminSignup from './pages/AdminSignup';
 import PendingApproval from './pages/PendingApproval';
 import RequireAdmin from './components/RequireAdmin';
 import Header from './components/Header';
