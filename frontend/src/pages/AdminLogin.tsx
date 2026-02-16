@@ -19,6 +19,12 @@ export default function AdminLogin() {
     e.preventDefault();
     setIsLoading(true);
 
+    if (password.length < 8) {
+      toast.error('Weak Security Key', { description: 'Password must be at least 8 characters long.' });
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await signInWithPassword(email, password);
       navigate('/admin-dashboard');
