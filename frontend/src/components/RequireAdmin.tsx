@@ -27,8 +27,8 @@ export default function RequireAdmin({ children }: { children: React.ReactNode }
             }
 
             if (profile.role !== 'admin') {
-                toast.error('Unauthorized Access', { description: 'This area is restricted to administrators.' });
-                navigate('/');
+                // Debug Mode: Show why it failed instead of redirecting
+                console.log("Admin Check Failed:", profile);
             } else {
                 setIsChecking(false);
             }
@@ -39,14 +39,55 @@ export default function RequireAdmin({ children }: { children: React.ReactNode }
 
     if (isInitializing || isChecking) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-950">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-white p-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mb-4"></div>
+                <p>Verifying Privileges...</p>
+                {/* Temporary Debug Info */}
+                {profile && (
+                    <div className="mt-8 p-4 bg-slate-900 rounded border border-slate-700 font-mono text-xs text-left">
+                        <p className="text-red-400 font-bold mb-2">DEBUG INFO (Share this if stuck):</p>
+                        <p>User ID: {user?.id}</p>
+                        <p>Email: {user?.email}</p>
+                        <p>Role: <span className="text-yellow-400">{profile.role}</span></p>
+                        <p>Status: {profile.status}</p>
+                    </div>
+                )}
             </div>
         );
     }
 
-    // Double check
-    if (profile?.role !== 'admin') return null;
+    if (profile?.role !== 'admin') {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-white p-6">
+                <div className="bg-red-900/20 p-6 rounded-lg border border-red-900/50 max-w-md w-full text-center">
+                    <h2 className="text-2xl font-bold text-red-500 mb-2">Access Denied</h2>
+                    <p className="text-slate-300 mb-6">Your account does not have administrator privileges.</p>
+
+                    <div className="bg-black/30 p-4 rounded text-left font-mono text-sm space-y-2 mb-6">
+                        <p><strong>Current Info:</strong></p>
+                        <p>ID: <span className="opacity-50">{user?.id}</span></p>
+                        <p>Role: <span className="text-red-400">{profile?.role || 'None'}</span></p>
+                        <p>Status: {profile?.status || 'Unknown'}</p>
+                    </div>
+
+                    <div className="flex gap-3 justify-center">
+                        <button
+                            onClick={() => refreshProfile()}
+                            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded transition-colors"
+                        >
+                            Force Refresh
+                        </button>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded transition-colors"
+                        >
+                            Go Home
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return <>{children}</>;
 }
