@@ -111,22 +111,36 @@ export function useUpdateUserProfile() {
 
 export function useResolveAlert() {
   const queryClient = useQueryClient();
+  const { user } = useSupabaseAuth();
 
   return useMutation({
     mutationFn: async (alertId: bigint) => {
       const { data, error } = await supabase
         .from('alerts')
         .update({ status: 'resolved' })
-        .eq('id', Number(alertId)) // Supabase ID is bigint but JS treats it as number/string usually. 
-        .select();
+        .eq('id', Number(alertId))
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Log to Audit Trail
+      if (user) {
+        await supabase.from('audit_logs').insert({
+          admin_id: user.id,
+          action: 'RESOLVED ALERT',
+          details: `Resolved alert #${alertId}`,
+          created_at: new Date().toISOString()
+        });
+      }
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activeAlerts'] });
       queryClient.invalidateQueries({ queryKey: ['historicalAlerts'] });
       queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
+      queryClient.invalidateQueries({ queryKey: ['auditLogs'] });
     },
     onError: (error) => {
       console.error('Error resolving alert:', error);
@@ -134,181 +148,11 @@ export function useResolveAlert() {
   });
 }
 
-export function useGetActiveAlerts() {
-  // Removed useActor since we are using Supabase
-  // const { actor, isFetching: actorFetching } = useActor(); 
-
-  return useQuery<EmergencyAlert[]>({
-    queryKey: ['activeAlerts'],
-    queryFn: async () => {
-      // Fetch from Supabase
-      const { data, error } = await supabase
-        .from('alerts')
-        .select('*')
-        .eq('status', 'active');
-
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      // Map Supabase rows to the frontend EmergencyAlert type expected by components
-      return (data || []).map((row: any) => {
-        // Map sos_type string to discriminated union
-        let sosType: SOSType;
-        switch (row.sos_type) {
-          case 'medical':
-            sosType = { 'medical': null };
-            break;
-          case 'fire':
-            sosType = { 'fire': null };
-            break;
-          case 'security':
-            sosType = { 'security': null };
-            break;
-          default:
-            sosType = { 'other': null };
-        }
-
-        return {
-          status: { 'active': null }, // Motoko Variant
-          timestamp: BigInt(new Date(row.created_at).getTime()) * 1000000n, // Nano seconds
-          location: {
-            latitude: row.latitude || 0,
-            longitude: row.longitude || 0
-          },
-          sosType,
-          alertId: BigInt(row.id),
-          userId: { _arr: new Uint8Array(), _isPrincipal: true, toText: () => row.user_id || 'anonymous' } as any // Mock Principal
-        };
-      });
-    },
-    // No actor dependency needed
-    refetchInterval: 3000,
-  });
-}
-
-export function useReportIncident() {
-  const queryClient = useQueryClient();
-  const { user } = useSupabaseAuth();
-
-  return useMutation({
-    mutationFn: async ({ description, location, media }: { description: string; location: GeoLocation; media: File[] }) => {
-      const mediaUrls: string[] = [];
-
-      if (!user) throw new Error("Not authenticated");
-
-      // Upload media files to Supabase Storage
-      for (const file of media) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${user.id}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('incident-media')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          console.error('Error uploading file:', uploadError);
-          continue;
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('incident-media')
-          .getPublicUrl(filePath);
-
-        mediaUrls.push(publicUrl);
-      }
-
-      const { data, error } = await supabase
-        .from('incident_reports')
-        .insert({
-          user_id: user.id,
-          description,
-          latitude: location.latitude,
-          longitude: location.longitude,
-          status: 'open',
-          media_urls: mediaUrls
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return BigInt(data.id); // Return ID as expected by component
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['latestIncidents'] });
-      queryClient.invalidateQueries({ queryKey: ['userIncidentReports'] });
-      queryClient.invalidateQueries({ queryKey: ['historicalReports'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] });
-    },
-    onError: (error) => {
-      console.error('Error reporting incident:', error);
-      throw error;
-    },
-  });
-}
-
-export function useGetLatestIncidents(limit: number = 10) {
-  // const { actor } = useActor(); // Removed
-
-  return useQuery<IncidentReport[]>({
-    queryKey: ['latestIncidents', limit],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('incident_reports')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
-
-      return (data || []).map((row: any) => ({
-        reportId: BigInt(row.id),
-        reporterId: { toText: () => row.user_id || 'anonymous', _isPrincipal: true } as any,
-        description: row.description,
-        location: { latitude: row.latitude, longitude: row.longitude },
-        timestamp: BigInt(new Date(row.created_at).getTime()) * 1000000n,
-        status: { 'open': null } as any, // Defaulting to open for now, ideally map row.status
-        media: [], // handling media urls later
-      }));
-    },
-    refetchInterval: 5000,
-  });
-}
-
-export function useGetUserIncidentReports() {
-  const { user } = useSupabaseAuth();
-
-  return useQuery<IncidentReport[]>({
-    queryKey: ['userIncidentReports', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-
-      const { data, error } = await supabase
-        .from('incident_reports')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      return (data || []).map((row: any) => ({
-        reportId: BigInt(row.id),
-        reporterId: { toText: () => row.user_id, _isPrincipal: true } as any,
-        description: row.description,
-        location: { latitude: row.latitude, longitude: row.longitude },
-        timestamp: BigInt(new Date(row.created_at).getTime()) * 1000000n,
-        status: { [row.status || 'open']: null } as any,
-        media: [],
-      }));
-    },
-    enabled: !!user,
-  });
-}
+// ... (skip other functions) ...
 
 export function useUpdateIncidentReportStatus() {
   const queryClient = useQueryClient();
+  const { user } = useSupabaseAuth();
 
   return useMutation({
     mutationFn: async ({ reportId, status }: { reportId: bigint; status: Variant_closed_open_inProgress }) => {
@@ -317,9 +161,21 @@ export function useUpdateIncidentReportStatus() {
         .from('incident_reports')
         .update({ status: statusString })
         .eq('id', Number(reportId))
-        .select();
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Log to Audit Trail
+      if (user) {
+        await supabase.from('audit_logs').insert({
+          admin_id: user.id,
+          action: `UPDATE REPORT ${statusString.toUpperCase()}`,
+          details: `Changed status of report #${reportId} to ${statusString}`,
+          created_at: new Date().toISOString()
+        });
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -328,45 +184,49 @@ export function useUpdateIncidentReportStatus() {
       queryClient.invalidateQueries({ queryKey: ['historicalReports'] });
       queryClient.invalidateQueries({ queryKey: ['reportComments'] });
       queryClient.invalidateQueries({ queryKey: ['reportStatusHistory'] });
+      queryClient.invalidateQueries({ queryKey: ['auditLogs'] });
     },
   });
 }
 
 export function useAddReportComment() {
   const queryClient = useQueryClient();
-  const { user } = useSupabaseAuth();
+  const { user, profile } = useSupabaseAuth(); // access profile to check role if needed
 
   return useMutation({
     mutationFn: async ({ reportId, comment }: { reportId: bigint; comment: string }) => {
       if (!user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
-        .from('report_comments') // Ensure this table exists in your schema or CREATE it
+        .from('report_comments')
         .insert({
           report_id: Number(reportId),
           user_id: user.id,
           content: comment
-          // Create 'report_comments' table if it doesn't exist yet, 
-          // or assuming it was part of schema. 
-          // If not in schema, I might need to add it. 
-          // Wait, I didn't see report_comments in schema.sql. 
-          // I should assume it's NOT there and maybe add it or skip for now.
-          // Actually, let's look at schema again. 
-          // I will assume for now I cannot implement this if table missing.
-          // But I'll write the code assuming table exists or I'll add it later.
-          // Actually, I'll check schema file content later.
         })
-        .select();
+        .select()
+        .single();
 
       if (error) {
-        // Fallback if table doesn't exist, just log
         console.warn("Comment table might not exist", error);
         return null;
       }
+
+      // Log to Audit Trail if Admin
+      if (profile?.role === 'admin') {
+        await supabase.from('audit_logs').insert({
+          admin_id: user.id,
+          action: 'ADD COMMENT',
+          details: `added comment to report #${reportId}: "${comment.substring(0, 20)}..."`,
+          created_at: new Date().toISOString()
+        });
+      }
+
       return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['reportComments', variables.reportId.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['auditLogs'] });
     },
   });
 }
