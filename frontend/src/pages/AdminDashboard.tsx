@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, ScanLine } from 'lucide-react';
 import ActiveAlertsPanel from '../components/ActiveAlertsPanel';
 import AdminFeedbackPanel from '../components/AdminFeedbackPanel';
 import HeatMapPanel from '../components/HeatMapPanel';
@@ -43,11 +43,35 @@ export default function AdminDashboard() {
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="admin">Admin</TabsTrigger>
           <TabsTrigger value="audit">Audit</TabsTrigger>
+          <TabsTrigger value="id">Verify ID</TabsTrigger>
           <TabsTrigger value="features">Features</TabsTrigger>
         </TabsList>
 
         <TabsContent value="review" className="space-y-4">
           <ProductionReviewReport />
+        </TabsContent>
+
+        {/* ... existing tabs ... */}
+
+        <TabsContent value="id" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Digital ID Verification</CardTitle>
+              <CardDescription>
+                Verify student identities and access permissions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Reusing DigitalIDPanel for now, typically Admin would have a Scanner here */}
+              {/* For this MVP, we show the panel so admin can see what students see, 
+                        or we could add a placeholder for "Scan QR" */}
+              <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border-2 border-dashed rounded-lg">
+                <ScanLine className="h-12 w-12 mb-4 opacity-50" />
+                <h3 className="text-lg font-medium">ID Scanner</h3>
+                <p>Camera integration for QR verification coming in v3.4</p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="alerts" className="space-y-4">
