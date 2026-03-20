@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import ProfileSetupModal from './components/ProfileSetupModal';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import EmergencyChatbot from './components/EmergencyChatbot';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from 'next-themes';
 import { useEffect, useState } from 'react';
@@ -101,6 +102,7 @@ function AppContent() {
         <ProfileSetupModal />
         <PWAInstallPrompt />
         <OfflineIndicator />
+        <EmergencyChatbot />
         <Toaster />
       </BrowserRouter>
     </div>
