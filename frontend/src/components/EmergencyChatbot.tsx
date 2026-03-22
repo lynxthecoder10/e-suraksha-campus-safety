@@ -6,7 +6,7 @@ interface ChatMessage {
   content: string;
 }
 
-const DEFAULT_GITHUB_TOKEN = "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";
+const ENV_GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN || "";
 
 export default function EmergencyChatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,7 +48,7 @@ Focus on safety and prompt response. Avoid being overly talkative.`
       // Ensure we only keep the last 10 messages to limit token usage
       const conversationHistory = messages.slice(-10);
 
-      const tokenToUse = apiKey.trim() || DEFAULT_GITHUB_TOKEN;
+      const tokenToUse = apiKey.trim() || ENV_GITHUB_TOKEN;
       const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
         method: 'POST',
         headers: {
