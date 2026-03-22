@@ -34,7 +34,7 @@ class _AdminIncidentDetailScreenState extends State<AdminIncidentDetailScreen> {
       setState(() => _currentStatus = newStatus);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Status updated successfully')),
+          SnackBar(content: Text('Status updated to ${newStatus.toUpperCase()}')),
         );
       }
     } catch (e) {
@@ -54,18 +54,6 @@ class _AdminIncidentDetailScreenState extends State<AdminIncidentDetailScreen> {
 
     setState(() => _isLoading = true);
     try {
-      // Assuming a 'comments' table exists or JSONB column. 
-      // For now, let's assume we append to a 'comments' JSONB array in the report itself if schema allows,
-      // OR mostly likely we have a separate 'comments' table as per Web app.
-      // Based on previous analysis, there is a `report_comments` table or similar.
-      // Let's look at `AdminReportManagementPanel.tsx` again or `supabase_schema.sql`.
-      // The web app uses `useAddReportComment`.
-      
-      // Let's assume a simple comments table for now based on standard pattern, 
-      // If not, we might need to check schema.
-      // Retrying with 'report_comments' table as seen in typical schemas, 
-      // or if it fails we check schema.
-      
       final user = SupabaseConfig.client.auth.currentUser;
       
       await SupabaseConfig.client.from('report_comments').insert({
@@ -77,11 +65,10 @@ class _AdminIncidentDetailScreenState extends State<AdminIncidentDetailScreen> {
       _commentController.clear();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Comment added')),
+          const SnackBar(content: Text('Comment added successfully')),
         );
       }
     } catch (e) {
-      // Fallback if table doesn't exist, we might need to debug schema.
        if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error adding comment: $e')),
@@ -94,93 +81,270 @@ class _AdminIncidentDetailScreenState extends State<AdminIncidentDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final date = DateTime.parse(widget.report['created_at'].toString());
+    final formattedDate = DateFormat.yMMMd().add_jm().format(date);
     
     return Scaffold(
-      appBar: AppBar(title: const Text('Report Details')),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Status Card
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+      backgroundColor: isDark ? const Color(0xFF020617) : const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: const Text('INCIDENT REPORT'),
+        titleTextStyle: TextStyle(
+          fontSize: 14, 
+          fontWeight: FontWeight.w900, 
+          letterSpacing: 2, 
+          color: isDark ? Colors.white70 : const Color(0xFF64748B)
+        ),
+      ),
+      body: Stack(
+        children: [
+          ListView(
+            padding: const EdgeInsets.all(24),
+            children: [
+              // Incident Info Card
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF111827) : Colors.white,
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFF1F5F9)),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.03), blurRadius: 20, offset: const Offset(0, 10))
+                  ],
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Current Status', style: TextStyle(color: Colors.grey)),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      value: _currentStatus,
-                      items: const [
-                         DropdownMenuItem(value: 'open', child: Text('Open (Red)', style: TextStyle(color: Colors.red))),
-                         DropdownMenuItem(value: 'inProgress', child: Text('In Progress (Blue)', style: TextStyle(color: Colors.blue))),
-                         DropdownMenuItem(value: 'closed', child: Text('Closed (Green)', style: TextStyle(color: Colors.green))),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: _getStatusColor(_currentStatus).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            _currentStatus.toUpperCase(),
+                            style: TextStyle(
+                              color: _getStatusColor(_currentStatus),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          formattedDate,
+                          style: TextStyle(fontSize: 11, color: isDark ? Colors.white24 : Colors.grey.shade400, fontWeight: FontWeight.w600),
+                        ),
                       ],
-                      onChanged: (val) {
-                        if (val != null && val != _currentStatus) {
-                          _updateStatus(val);
-                        }
-                      },
-                      decoration: const InputDecoration(border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      widget.report['description'] ?? 'No Description Provided',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Divider(height: 1, color: Colors.white10),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on_rounded, size: 18, color: Colors.blue.shade400),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'LOCATION DETAILS',
+                              style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: isDark ? Colors.white38 : Colors.grey.shade400, letterSpacing: 1),
+                            ),
+                            Text(
+                              'Lat: ${widget.report['latitude'].toStringAsFixed(4)}, Lng: ${widget.report['longitude'].toStringAsFixed(4)}',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isDark ? Colors.white70 : Colors.black87),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
+              
+              const SizedBox(height: 32),
+              
+              // Status Management
+              Text('WORKFLOW ACTIONS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: isDark ? Colors.white38 : const Color(0xFF94A3B8), letterSpacing: 1.5)),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _buildActionButton(
+                    label: 'INVESTIGATE',
+                    icon: Icons.search_rounded,
+                    color: Colors.blue,
+                    isActive: _currentStatus == 'investigating',
+                    onTap: () => _updateStatus('investigating'),
+                  ),
+                  const SizedBox(width: 12),
+                  _buildActionButton(
+                    label: 'RESOLVE',
+                    icon: Icons.check_circle_rounded,
+                    color: Colors.green,
+                    isActive: _currentStatus == 'resolved',
+                    onTap: () => _updateStatus('resolved'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildActionButton(
+                label: 'REJECT / SPAM',
+                icon: Icons.block_flipped,
+                color: Colors.red,
+                isActive: _currentStatus == 'rejected',
+                onTap: () => _updateStatus('rejected'),
+                isFullWidth: true,
+              ),
+              
+              const SizedBox(height: 40),
+              
+              // Comments Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('ADMIN ACTIVITY LOG', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: isDark ? Colors.white38 : const Color(0xFF94A3B8), letterSpacing: 1.5)),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: SupabaseConfig.client.from('report_comments').stream(primaryKey: ['id']).eq('report_id', widget.report['id']),
+                    builder: (context, snapshot) => Text(
+                      '${snapshot.data?.length ?? 0} NOTES',
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _CommentsList(reportId: widget.report['id']),
+              const SizedBox(height: 100), // Space for input
+            ],
+          ),
+          
+          // Comment Input Overlay
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 16),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                border: Border(top: BorderSide(color: isDark ? Colors.white10 : Colors.black12)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E293B) : Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: TextField(
+                        controller: _commentController,
+                        style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                        decoration: const InputDecoration(
+                          hintText: 'Add an administrative note...',
+                          hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: _addComment,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            
-            // Details Card
-            Card(
-               child: Padding(
-                 padding: const EdgeInsets.all(16.0),
-                 child: Column(
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: [
-                     Text('Report #${widget.report['id']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                     const SizedBox(height: 8),
-                     Text('Date: ${DateFormat('MMM d, y h:mm a').format(date)}'),
-                     const Divider(),
-                     const Text('Description:', style: TextStyle(fontWeight: FontWeight.bold)),
-                     const SizedBox(height: 4),
-                     Text(widget.report['description'] ?? 'No description'),
-                     const SizedBox(height: 16),
-                     const Text('Location:', style: TextStyle(fontWeight: FontWeight.bold)),
-                     Text('Lat: ${widget.report['latitude']}, Lng: ${widget.report['longitude']}'),
-                   ],
-                 ),
-               ),
+          ),
+          
+          if (_isLoading)
+            Container(
+              color: Colors.black26,
+              child: const Center(child: CircularProgressIndicator()),
             ),
-             const SizedBox(height: 16),
-             
-             // Comments Section
-            const Text('Comments', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-             _CommentsList(reportId: widget.report['id']),
-             
-             const SizedBox(height: 16),
-             Row(
-               children: [
-                 Expanded(
-                   child: TextField(
-                     controller: _commentController,
-                     decoration: const InputDecoration(
-                       hintText: 'Add a comment...',
-                       border: OutlineInputBorder(),
-                     ),
-                   ),
-                 ),
-                 IconButton(
-                   icon: const Icon(Icons.send),
-                   onPressed: _addComment,
-                 )
-               ],
-             ),
-          ],
-        ),
+        ],
+      ),
     );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required bool isActive,
+    required VoidCallback onTap,
+    bool isFullWidth = false,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Expanded(
+      flex: isFullWidth ? 1 : 1,
+      child: InkWell(
+        onTap: isActive ? null : onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: isFullWidth ? double.infinity : null,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            color: isActive ? color : color.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: isActive ? color : color.withOpacity(0.2)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 18, color: isActive ? Colors.white : color),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  color: isActive ? Colors.white : color,
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'resolved':
+        return Colors.green;
+      case 'investigating':
+        return Colors.blue;
+      case 'rejected':
+        return Colors.red;
+      default:
+        return Colors.orange;
+    }
   }
 }
 
@@ -190,7 +354,8 @@ class _CommentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     final stream = SupabaseConfig.client
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final stream = SupabaseConfig.client
         .from('report_comments')
         .stream(primaryKey: ['id'])
         .eq('report_id', reportId)
@@ -199,17 +364,70 @@ class _CommentsList extends StatelessWidget {
     return StreamBuilder<List<Map<String, dynamic>>>(
       stream: stream,
       builder: (context, snapshot) {
-         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-           return const Text('No comments yet.');
-         }
-         final comments = snapshot.data!;
-         return Column(
-           children: comments.map((c) => ListTile(
-             title: Text(c['content'] ?? ''),
-             subtitle: Text(DateFormat('h:mm a').format(DateTime.parse(c['created_at'].toString()))),
-             leading: const Icon(Icons.person),
-           )).toList(),
-         );
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              child: Text(
+                'NO RECENT ACTIVITY',
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: isDark ? Colors.white10 : Colors.grey.shade200, letterSpacing: 1),
+              ),
+            ),
+          );
+        }
+        final comments = snapshot.data!;
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: comments.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final c = comments[index];
+            final time = DateFormat('h:mm a').format(DateTime.parse(c['created_at'].toString()));
+            
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF111827) : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: isDark ? Colors.white10 : const Color(0xFFF1F5F9)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 10,
+                            backgroundColor: Colors.blue.withOpacity(0.1),
+                            child: const Icon(Icons.person_rounded, size: 12, color: Colors.blue),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'ADMINISTRATOR',
+                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.blue, letterSpacing: 0.5),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        time,
+                        style: TextStyle(fontSize: 10, color: isDark ? Colors.white24 : Colors.grey.shade400, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    c['content'] ?? '',
+                    style: TextStyle(fontSize: 14, color: isDark ? Colors.white70 : Colors.black87, height: 1.4),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
       },
     );
   }

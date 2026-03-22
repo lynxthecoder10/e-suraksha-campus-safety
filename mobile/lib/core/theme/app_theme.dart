@@ -92,7 +92,7 @@ class AppTheme {
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
@@ -108,29 +108,76 @@ class AppTheme {
     brightness: Brightness.dark,
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryColor,
+      primary: primaryColor,
+      secondary: secondaryColor,
+      error: errorColor,
+      surface: const Color(0xFF0F172A), // Deep Slate
+      onSurface: Colors.white,
       brightness: Brightness.dark,
-      surface: const Color(0xFF0F172A),
     ),
-    scaffoldBackgroundColor: const Color(0xFF0F172A),
+    scaffoldBackgroundColor: const Color(0xFF020617), // Rich Navy/Black
     appBarTheme: const AppBarTheme(
       centerTitle: true,
       elevation: 0,
       backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
+      titleTextStyle: TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: primaryColor,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        elevation: 2,
+        shadowColor: Colors.black.withOpacity(0.5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        side: const BorderSide(color: Color(0xFF334155)), // Slate 700
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: const Color(0xFF1E293B), // Slate 800
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFF334155)),
       ),
-      filled: true,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFF334155)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: primaryColor, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+    ),
+    cardTheme: CardThemeData(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: const BorderSide(color: Color(0xFF334155)),
+      ),
+      color: const Color(0xFF111827), // Deepest Gray/Blue
+    ),
+    textTheme: const TextTheme(
+      displayLarge: TextStyle(color: Colors.white),
+      displayMedium: TextStyle(color: Colors.white),
+      bodyLarge: TextStyle(color: Color(0xFFCBD5E1)), // Light Slate
+      bodyMedium: TextStyle(color: Color(0xFF94A3B8)), // Slate 400
     ),
   );
 }

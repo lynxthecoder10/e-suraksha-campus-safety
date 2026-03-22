@@ -7,7 +7,9 @@ import '../../features/sos/presentation/home_screen.dart';
 import '../../features/map/presentation/map_screen.dart';
 import '../../features/incidents/presentation/incidents_screen.dart';
 import '../../features/incidents/presentation/add_incident_screen.dart';
+import '../../features/incidents/presentation/my_reports_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/profile/presentation/digital_id_screen.dart';
 import '../../features/contacts/presentation/emergency_contacts_screen.dart';
 import '../../features/safety_resources/presentation/safety_guidelines_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
@@ -15,6 +17,7 @@ import '../../features/admin/presentation/admin_dashboard_screen.dart';
 import '../../features/admin/presentation/admin_incidents_screen.dart';
 import '../../features/admin/presentation/admin_incident_detail_screen.dart';
 import '../../features/admin/presentation/admin_users_screen.dart';
+import '../../features/admin/presentation/qr_scanner_screen.dart';
 import 'scaffold_with_navbar.dart';
 import '../config/supabase_config.dart';
 import 'go_router_refresh_stream.dart';
@@ -26,16 +29,35 @@ final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/home',
   refreshListenable: GoRouterRefreshStream(SupabaseConfig.client.auth.onAuthStateChange),
-  redirect: (context, state) {
+  redirect: (context, state) async {
     final session = SupabaseConfig.client.auth.currentSession;
     final isLoggingIn = state.uri.toString() == '/auth';
 
     if (session == null && !isLoggingIn) {
       return '/auth';
     }
-    if (session != null && isLoggingIn) {
-      return '/home';
+    
+    if (session != null) {
+      if (isLoggingIn) return '/home';
+      
+      // Admin Route Protection
+      if (state.uri.toString().startsWith('/admin')) {
+        try {
+          final profile = await SupabaseConfig.client
+              .from('profiles')
+              .select('role')
+              .eq('id', session.user.id)
+              .maybeSingle();
+              
+          if (profile == null || profile['role'] != 'admin') {
+            return '/home'; // Unauthorized
+          }
+        } catch (e) {
+          return '/home'; // Error fallback
+        }
+      }
     }
+    
     return null;
   },
   routes: [
@@ -78,6 +100,10 @@ final appRouter = GoRouter(
                   path: 'add',
                   builder: (context, state) => const AddIncidentScreen(),
                 ),
+                GoRoute(
+                  path: 'mine',
+                  builder: (context, state) => const MyReportsScreen(),
+                ),
               ],
             ),
           ],
@@ -88,6 +114,10 @@ final appRouter = GoRouter(
               path: '/profile',
               builder: (context, state) => const ProfileScreen(),
               routes: [
+                GoRoute(
+                  path: 'digital-id',
+                  builder: (context, state) => const DigitalIDScreen(),
+                ),
                 GoRoute(
                   path: 'contacts',
                   builder: (context, state) => const EmergencyContactsScreen(),
@@ -126,6 +156,10 @@ final appRouter = GoRouter(
         GoRoute(
           path: 'users',
           builder: (context, state) => const AdminUsersScreen(),
+        ),
+        GoRoute(
+          path: 'scan',
+          builder: (context, state) => const QRScannerScreen(),
         ),
       ],
     ),

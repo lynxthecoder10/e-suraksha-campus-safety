@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:go_router/go_router.dart';
-import '../../../core/config/supabase_config.dart';
 import 'package:intl/intl.dart';
+import '../../../core/config/supabase_config.dart';
 
-class IncidentsListScreen extends StatefulWidget {
-  const IncidentsListScreen({super.key});
+class MyReportsScreen extends StatefulWidget {
+  const MyReportsScreen({super.key});
 
   @override
-  State<IncidentsListScreen> createState() => _IncidentsListScreenState();
+  State<MyReportsScreen> createState() => _MyReportsScreenState();
 }
 
-class _IncidentsListScreenState extends State<IncidentsListScreen> {
-  final _incidentsStream = SupabaseConfig.client
-      .from('incident_reports')
-      .stream(primaryKey: ['id'])
-      .order('created_at', ascending: false);
+class _MyReportsScreenState extends State<MyReportsScreen> {
+  late final Stream<List<Map<String, dynamic>>> _myReportsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    final userId = SupabaseConfig.client.auth.currentUser?.id;
+    _myReportsStream = SupabaseConfig.client
+        .from('incident_reports')
+        .stream(primaryKey: ['id'])
+        .eq('reporter_id', userId ?? '')
+        .order('created_at', ascending: false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,24 +31,16 @@ class _IncidentsListScreenState extends State<IncidentsListScreen> {
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF020617) : const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('SAFETY FEED'),
+        title: const Text('MY REPORTS'),
         titleTextStyle: TextStyle(
           fontSize: 14, 
           fontWeight: FontWeight.w900, 
           letterSpacing: 2, 
           color: isDark ? Colors.white70 : const Color(0xFF64748B)
         ),
-        actions: [
-          IconButton(
-            onPressed: () => context.push('/incidents/mine'),
-            icon: const Icon(Icons.history_rounded),
-            tooltip: 'My Reports',
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _incidentsStream,
+        stream: _myReportsStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)));
@@ -49,28 +48,31 @@ class _IncidentsListScreenState extends State<IncidentsListScreen> {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final incidents = snapshot.data!;
-          if (incidents.isEmpty) {
+          final reports = snapshot.data!;
+          if (reports.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   Icon(Icons.shield_outlined, size: 64, color: isDark ? Colors.white10 : Colors.grey.shade200),
-                   const SizedBox(height: 16),
-                   Text('No community reports yet.', style: TextStyle(color: isDark ? Colors.white24 : Colors.grey)),
+                  Icon(Icons.assignment_turned_in_rounded, size: 64, color: isDark ? Colors.white10 : Colors.grey.shade200),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No reports submitted yet',
+                    style: TextStyle(color: isDark ? Colors.white24 : Colors.grey, fontWeight: FontWeight.w600),
+                  ),
                 ],
               ),
             );
           }
 
           return ListView.builder(
-            itemCount: incidents.length,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            itemCount: reports.length,
+            padding: const EdgeInsets.all(24),
             itemBuilder: (context, index) {
-              final incident = incidents[index];
-              final date = DateTime.parse(incident['created_at']);
+              final report = reports[index];
+              final date = DateTime.parse(report['created_at']);
               final formattedDate = DateFormat.yMMMd().add_jm().format(date);
-              final status = (incident['status'] ?? 'open').toString().toLowerCase();
+              final status = (report['status'] ?? 'open').toString().toLowerCase();
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 20),
@@ -85,21 +87,6 @@ class _IncidentsListScreenState extends State<IncidentsListScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (incident['media_urls'] != null && (incident['media_urls'] as List).isNotEmpty)
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                        child: Image.network(
-                          (incident['media_urls'] as List).first,
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            height: 180,
-                            color: isDark ? Colors.white10 : Colors.grey.shade100,
-                            child: const Icon(Icons.broken_image_rounded, color: Colors.grey),
-                          ),
-                        ),
-                      ),
                     Padding(
                       padding: const EdgeInsets.all(20),
                       child: Column(
@@ -136,29 +123,70 @@ class _IncidentsListScreenState extends State<IncidentsListScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            incident['description'] ?? 'No Description',
+                            report['description'] ?? 'No Description',
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: isDark ? Colors.white : const Color(0xFF1E293B),
-                              height: 1.4,
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              Icon(Icons.location_on_rounded, size: 14, color: isDark ? Colors.white24 : Colors.grey.shade300),
-                              const SizedBox(width: 6),
-                              Text(
-                                'CAMPUS SECTOR ${incident['latitude'].toString().substring(0, 4)}',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: isDark ? Colors.white24 : Colors.grey.shade400,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.5,
+                        ],
+                      ),
+                    ),
+                    if (report['admin_comments'] != null)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.blue.withOpacity(0.1)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(Icons.comment_rounded, size: 14, color: Colors.blue),
+                                SizedBox(width: 8),
+                                Text(
+                                  'ADMIN RESPONSE',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.blue,
+                                    letterSpacing: 1,
+                                  ),
                                 ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              report['admin_comments'],
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isDark ? Colors.white70 : Colors.black87,
+                                height: 1.4,
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      child: Row(
+                        children: [
+                          Icon(Icons.location_on_rounded, size: 14, color: isDark ? Colors.white24 : Colors.grey.shade300),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Campus Sector ${report['latitude'].toString().substring(0, 4)}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark ? Colors.white24 : Colors.grey.shade400,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -170,15 +198,6 @@ class _IncidentsListScreenState extends State<IncidentsListScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/incidents/add'),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('REPORT INCIDENT', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
     );
   }
 
@@ -188,6 +207,8 @@ class _IncidentsListScreenState extends State<IncidentsListScreen> {
         return Colors.green;
       case 'investigating':
         return Colors.blue;
+      case 'rejected':
+        return Colors.red;
       default:
         return Colors.orange;
     }

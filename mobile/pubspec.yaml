@@ -75,6 +75,10 @@ dependencies:
   dio: ^5.7.0
   google_sign_in: ^6.2.1
 
+  # QR & Scanning
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^5.2.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

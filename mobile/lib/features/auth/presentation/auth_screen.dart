@@ -90,6 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Stack(
         children: [
@@ -147,7 +148,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       'E-SURAKSHA',
                       style: TextStyle(
                         fontSize: 32,
-                        fontWeight: FontWeight.black,
+                        fontWeight: FontWeight.w900,
                         color: Colors.white,
                         letterSpacing: 4,
                       ),
@@ -166,11 +167,11 @@ class _AuthScreenState extends State<AuthScreen> {
                     Container(
                       padding: const EdgeInsets.all(32),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(32),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -181,10 +182,10 @@ class _AuthScreenState extends State<AuthScreen> {
                         children: [
                           Text(
                             _isSignUp ? 'Create Account' : 'Welcome Back',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1E293B),
+                              color: isDark ? Colors.white : const Color(0xFF1E293B),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -192,9 +193,9 @@ class _AuthScreenState extends State<AuthScreen> {
                             _isSignUp 
                               ? 'Join the community for a safer campus' 
                               : 'Protect yourself and others today',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
-                              color: Colors.blueGrey,
+                              color: isDark ? Colors.white70 : Colors.blueGrey,
                             ),
                           ),
                           const SizedBox(height: 32),
@@ -316,7 +317,5 @@ class _AuthScreenState extends State<AuthScreen> {
         ],
       ),
     );
-  }
-}
   }
 }

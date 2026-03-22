@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:e_suraksha_mobile/core/config/supabase_config.dart';
 import 'package:e_suraksha_mobile/core/theme/app_theme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   Map<String, dynamic>? _profile;
+  bool _isSOSTriggering = false;
   
   final _alertsStream = SupabaseConfig.client
       .from('alerts')
@@ -63,23 +65,54 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   Future<void> _triggerSOS() async {
+    if (_isSOSTriggering) return;
+    
+    setState(() => _isSOSTriggering = true);
+    
     try {
       final user = SupabaseConfig.client.auth.currentUser;
       if (user == null) return;
 
+      // 1. Get Location Permissions & Position
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _showFeedback('Location permissions are denied', isError: true);
+          setState(() => _isSOSTriggering = false);
+          return;
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        _showFeedback('Location permissions are permanently denied.', isError: true);
+        setState(() => _isSOSTriggering = false);
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high
+      );
+
+      // 2. Broadcast to Supabase
       await SupabaseConfig.client.from('alerts').insert({
         'user_id': user.id,
         'type': 'medical', 
         'status': 'active',
-        'latitude': 12.9716, 
-        'longitude': 77.5946,
-        'extra_data': 'Mobile SOS Triggered',
+        'latitude': position.latitude, 
+        'longitude': position.longitude,
+        'extra_data': 'High-Priority Emergency Signal (Live)',
       });
+
       if (mounted) {
         _showFeedback('SOS Signal Broadcasted! Help is arriving.');
       }
     } catch (error) {
       _showFeedback('Failed: $error', isError: true);
+    } finally {
+      if (mounted) {
+        setState(() => _isSOSTriggering = false);
+      }
     }
   }
 
@@ -90,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             content: Text(message),
             behavior: SnackBarBehavior.floating,
             backgroundColor: isError ? Colors.red : Colors.green,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
      }
@@ -98,9 +132,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final isAdmin = _profile?['role'] == 'admin';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: isDark ? const Color(0xFF020617) : const Color(0xFFF1F5F9),
       body: SafeArea(
         child: Column(
           children: [
@@ -121,11 +156,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                              color: AppTheme.primaryColor.withOpacity(0.6)
                            )
                          ),
-                         const Text('Command Center', 
+                         Text('Command Center', 
                            style: TextStyle(
                              fontSize: 26, 
                              fontWeight: FontWeight.w900,
-                             color: Color(0xFF0F172A)
+                             color: isDark ? Colors.white : const Color(0xFF0F172A)
                            )
                          ),
                        ],
@@ -134,6 +169,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                    IconButton.filledTonal(
                      onPressed: () => context.push('/notifications'),
                      icon: const Icon(Icons.notifications_active_outlined),
+                   ),
+                   const SizedBox(width: 8),
+                   IconButton.outlined(
+                     onPressed: () => context.push('/profile'),
+                     icon: const Icon(Icons.person_outline),
                    ),
                 ],
               ),
@@ -145,10 +185,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))
+                    BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.04), blurRadius: 10, offset: const Offset(0, 4))
                   ],
                 ),
                 child: Row(
@@ -156,18 +196,29 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade50,
+                        color: Colors.green.shade50.withOpacity(isDark ? 0.2 : 1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.bluetooth_connected, size: 18, color: Colors.green),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Mesh Network Active', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                          Text('You are connected to 8 neighbors', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                          Text('Mesh Network Active', 
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold, 
+                              fontSize: 13,
+                              color: isDark ? Colors.white : Colors.black
+                            )
+                          ),
+                          Text('You are connected to 8 neighbors', 
+                            style: TextStyle(
+                              fontSize: 11, 
+                              color: isDark ? Colors.white60 : Colors.grey
+                            )
+                          ),
                         ],
                       ),
                     ),
@@ -222,39 +273,46 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             ],
                             border: Border.all(color: Colors.white.withOpacity(0.2), width: 8),
                           ),
-                          child: const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          child: Stack(
+                            alignment: Alignment.center,
                             children: [
-                               Icon(Icons.touch_app, color: Colors.white, size: 40),
-                               SizedBox(height: 12),
-                               Text('SIGNAL', 
-                                 style: TextStyle(
-                                   color: Colors.white, 
-                                   fontWeight: FontWeight.w900, 
-                                   fontSize: 28,
-                                   letterSpacing: 4
-                                 )
-                               ),
-                               Text('FOR HELP', 
-                                 style: TextStyle(
-                                   color: Colors.white70, 
-                                   fontWeight: FontWeight.bold, 
-                                   fontSize: 12,
-                                   letterSpacing: 1
-                                 )
-                               ),
+                              _isSOSTriggering 
+                                ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 6)
+                                : const Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                       Icon(Icons.touch_app, color: Colors.white, size: 40),
+                                       SizedBox(height: 12),
+                                       Text('SIGNAL', 
+                                         style: TextStyle(
+                                           color: Colors.white, 
+                                           fontWeight: FontWeight.w900, 
+                                           fontSize: 28,
+                                           letterSpacing: 4
+                                         )
+                                       ),
+                                       Text('FOR HELP', 
+                                         style: TextStyle(
+                                           color: Colors.white70, 
+                                           fontWeight: FontWeight.bold, 
+                                           fontSize: 12,
+                                           letterSpacing: 1
+                                         )
+                                       ),
+                                    ],
+                                  ),
                             ],
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 40),
-                    const Text('LONG PRESS FOR 2 SECONDS', 
+                    Text('LONG PRESS FOR 2 SECONDS', 
                       style: TextStyle(
                         fontSize: 12, 
                         fontWeight: FontWeight.w800, 
                         letterSpacing: 1,
-                        color: Colors.blueGrey
+                        color: isDark ? Colors.white54 : Colors.blueGrey
                       )
                     ),
                   ],
@@ -266,14 +324,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             Container(
               height: 280,
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF111827) : Colors.white,
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(40),
                   topRight: Radius.circular(40),
                 ),
                 boxShadow: [
-                  BoxShadow(color: Colors.black12, blurRadius: 20, offset: Offset(0, -10))
+                  BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.1), blurRadius: 20, offset: const Offset(0, -10))
                 ],
               ),
               child: Column(
@@ -283,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                      width: 40,
                      height: 4,
                      decoration: BoxDecoration(
-                       color: Colors.grey.shade200,
+                       color: isDark ? Colors.white12 : Colors.grey.shade200,
                        borderRadius: BorderRadius.circular(2),
                      ),
                    ),
@@ -292,7 +350,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                      child: Row(
                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                        children: [
-                         const Text('Safety Feed', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: Color(0xFF0F172A))),
+                         Text('Safety Feed', 
+                           style: TextStyle(
+                             fontWeight: FontWeight.w900, 
+                             fontSize: 20, 
+                             color: isDark ? Colors.white : const Color(0xFF0F172A)
+                           )
+                         ),
                          TextButton.icon(
                             onPressed: () => context.go('/map'), 
                             icon: const Icon(Icons.map_outlined, size: 18),
@@ -312,7 +376,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                children: [
                                   Icon(Icons.verified_user, color: Colors.green.shade400, size: 48),
                                   const SizedBox(height: 12),
-                                  const Text('Zone Secured', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                                  Text('Zone Secured', 
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold, 
+                                      color: isDark ? Colors.white38 : Colors.grey
+                                    )
+                                  ),
                                ],
                              ),
                            );
@@ -327,9 +396,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                margin: const EdgeInsets.only(bottom: 12),
                                padding: const EdgeInsets.all(16),
                                decoration: BoxDecoration(
-                                 color: const Color(0xFFFFF1F2),
+                                 color: isDark ? const Color(0xFF1E293B) : const Color(0xFFFFF1F2),
                                  borderRadius: BorderRadius.circular(20),
-                                 border: Border.all(color: Colors.red.shade100),
+                                 border: Border.all(color: isDark ? Colors.white10 : Colors.red.shade100),
                                ),
                                child: Row(
                                  children: [
@@ -343,7 +412,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Colors.red)
                                          ),
                                          Text(alert['extra_data'] ?? 'Emergency reported', 
-                                           style: const TextStyle(fontSize: 12, color: Colors.blueGrey)
+                                           style: TextStyle(
+                                             fontSize: 12, 
+                                             color: isDark ? Colors.white70 : Colors.blueGrey
+                                           )
                                          ),
                                        ],
                                      ),

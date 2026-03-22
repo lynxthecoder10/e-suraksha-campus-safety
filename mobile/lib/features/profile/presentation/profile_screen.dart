@@ -47,16 +47,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = SupabaseConfig.client.auth.currentUser;
     final role = _profile?['role'] ?? 'user';
     final isAdmin = role == 'admin';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDark ? const Color(0xFF020617) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text('ACCOUNT SETTINGS'),
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           fontSize: 14, 
           fontWeight: FontWeight.w900, 
           letterSpacing: 2, 
-          color: Color(0xFF64748B)
+          color: isDark ? Colors.white70 : const Color(0xFF64748B)
         ),
       ),
       body: ListView(
@@ -66,11 +67,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF111827) : Colors.white,
               borderRadius: BorderRadius.circular(32),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20, offset: const Offset(0, 10))
+                BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.03), blurRadius: 20, offset: const Offset(0, 10))
               ],
+              border: isDark ? Border.all(color: Colors.white10) : null,
             ),
             child: Column(
               children: [
@@ -84,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       child: CircleAvatar(
                         radius: 50,
-                        backgroundColor: Colors.white,
+                        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                         backgroundImage: _profile?['profile_photo'] != null 
                           ? NetworkImage(_profile!['profile_photo']) 
                           : null,
@@ -101,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         decoration: BoxDecoration(
                           color: AppTheme.primaryColor,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 3),
+                          border: Border.all(color: isDark ? const Color(0xFF111827) : Colors.white, width: 3),
                         ),
                         child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 14),
                       ),
@@ -111,24 +113,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 16),
                 Text(
                   _profile?['name'] ?? 'Authorized User',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                 ),
                 Text(
                   user?.email ?? '',
-                  style: const TextStyle(fontSize: 14, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 14, color: isDark ? Colors.white60 : const Color(0xFF64748B), fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isAdmin ? const Color(0xFFFEF2F2) : const Color(0xFFEEF2FF),
+                    color: isAdmin ? const Color(0xFFFEF2F2).withOpacity(isDark ? 0.2 : 1) : const Color(0xFFEEF2FF).withOpacity(isDark ? 0.2 : 1),
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Text(
                     role.toString().toUpperCase(),
                     style: TextStyle(
                       fontSize: 10, 
-                      fontWeight: FontWeight.black, 
+                      fontWeight: FontWeight.w900, 
                       letterSpacing: 1,
                       color: isAdmin ? const Color(0xFFEF4444) : AppTheme.primaryColor
                     ),
@@ -139,28 +141,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           
           const SizedBox(height: 32),
-          const Text('GENERAL', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF94A3B8), letterSpacing: 1.5)),
+          Text('GENERAL', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: isDark ? Colors.white38 : const Color(0xFF94A3B8), letterSpacing: 1.5)),
           const SizedBox(height: 12),
           
           _buildSettingsCard(
+            isDark: isDark,
             children: [
               _buildSettingTile(
+                isDark: isDark,
+                icon: Icons.badge_rounded,
+                iconColor: Colors.deepPurple,
+                title: 'Digital Identity',
+                subtitle: 'Your QR-based campus access card',
+                onTap: () => context.go('/profile/digital-id'),
+              ),
+              Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : const Color(0xFFF1F5F9)),
+              _buildSettingTile(
+                isDark: isDark,
                 icon: Icons.contact_phone_rounded,
                 iconColor: Colors.blue,
                 title: 'Emergency Contacts',
                 subtitle: 'Manage your primary responders',
                 onTap: () => context.go('/profile/contacts'),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF1F5F9)),
+              Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : const Color(0xFFF1F5F9)),
               _buildSettingTile(
+                isDark: isDark,
                 icon: Icons.security_rounded,
                 iconColor: Colors.teal,
                 title: 'Campus Safety Kit',
                 subtitle: 'Guidelines and local resources',
                 onTap: () => context.go('/profile/safety'),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF1F5F9)),
+              Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : const Color(0xFFF1F5F9)),
               _buildSettingTile(
+                isDark: isDark,
                 icon: Icons.notifications_active_rounded,
                 iconColor: Colors.orange,
                 title: 'Broadcast Alerts',
@@ -171,20 +186,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           
           const SizedBox(height: 24),
-          const Text('SYSTEM', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF94A3B8), letterSpacing: 1.5)),
+          Text('SYSTEM', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: isDark ? Colors.white38 : const Color(0xFF94A3B8), letterSpacing: 1.5)),
           const SizedBox(height: 12),
           
           _buildSettingsCard(
+            isDark: isDark,
             children: [
               _buildSettingTile(
+                isDark: isDark,
                 icon: Icons.offline_bolt_rounded,
                 iconColor: Colors.indigo,
                 title: 'Offline Mesh Protocol',
                 subtitle: 'Active and available',
                 trailing: const Icon(Icons.check_circle_rounded, color: Colors.green, size: 20),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF1F5F9)),
+              Divider(height: 1, indent: 56, color: isDark ? Colors.white10 : const Color(0xFFF1F5F9)),
               _buildSettingTile(
+                isDark: isDark,
                 icon: Icons.privacy_tip_rounded,
                 iconColor: Colors.blueGrey,
                 title: 'Privacy Center',
@@ -201,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: const Icon(Icons.logout_rounded, size: 18),
             label: const Text('SECURE SIGN OUT', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFEF2F2),
+              backgroundColor: const Color(0xFFFEF2F2).withOpacity(isDark ? 0.1 : 1),
               foregroundColor: const Color(0xFFEF4444),
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -210,10 +228,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           
           const SizedBox(height: 40),
-          const Center(
+          Center(
             child: Text(
               'v1.1.0 • E-SURAKSHA PROTOCOL',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
+              style: TextStyle(color: isDark ? Colors.white24 : const Color(0xFF94A3B8), fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1),
             ),
           ),
           const SizedBox(height: 20),
@@ -222,14 +240,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSettingsCard({required List<Widget> children}) {
+  Widget _buildSettingsCard({required List<Widget> children, required bool isDark}) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF111827) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 5))
+          BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.02), blurRadius: 15, offset: const Offset(0, 5))
         ],
+        border: isDark ? Border.all(color: Colors.white10) : null,
       ),
       child: Column(children: children),
     );
@@ -240,6 +259,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required Color iconColor,
     required String title,
     required String subtitle,
+    required bool isDark,
     Widget? trailing,
     VoidCallback? onTap,
   }) {
@@ -254,9 +274,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         child: Icon(icon, color: iconColor, size: 22),
       ),
-      title: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF1E293B))),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-      trailing: trailing ?? const Icon(Icons.chevron_right_rounded, color: Color(0xFFCBD5E1)),
+      title: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: isDark ? Colors.white : const Color(0xFF1E293B))),
+      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: isDark ? Colors.white60 : const Color(0xFF64748B))),
+      trailing: trailing ?? Icon(Icons.chevron_right_rounded, color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
     );
   }
 }

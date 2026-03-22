@@ -18,6 +18,7 @@ class EmergencyContactsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final contacts = [
       {'name': 'Campus Security', 'number': '112', 'icon': Icons.security_rounded, 'color': Colors.indigo, 'tag': 'PRIMARY'},
       {'name': 'Medical Emergency', 'number': '102', 'icon': Icons.medical_services_rounded, 'color': Colors.redAccent, 'tag': '24/7'},
@@ -26,14 +27,14 @@ class EmergencyContactsScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDark ? const Color(0xFF020617) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text('EMERGENCY CONTACTS'),
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           fontSize: 14, 
           fontWeight: FontWeight.w900, 
           letterSpacing: 2, 
-          color: Color(0xFF64748B)
+          color: isDark ? Colors.white70 : const Color(0xFF64748B)
         ),
       ),
       body: ListView.separated(
@@ -46,11 +47,12 @@ class EmergencyContactsScreen extends StatelessWidget {
           
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF111827) : Colors.white,
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15, offset: const Offset(0, 5))
+                BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.02), blurRadius: 15, offset: const Offset(0, 5))
               ],
+              border: isDark ? Border.all(color: Colors.white10) : null,
             ),
             child: Material(
               color: Colors.transparent,
@@ -61,7 +63,7 @@ class EmergencyContactsScreen extends StatelessWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(contact['icon'] as IconData, color: color, size: 28),
@@ -71,30 +73,34 @@ class EmergencyContactsScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         contact['name'] as String, 
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Color(0xFF1E293B)),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800, 
+                          fontSize: 16, 
+                          color: isDark ? Colors.white : const Color(0xFF1E293B)
+                        ),
                       ),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.05),
+                        color: color.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         contact['tag'] as String,
-                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.black, color: color, letterSpacing: 0.5),
+                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: color, letterSpacing: 0.5),
                       ),
                     ),
                   ],
                 ),
                 subtitle: Text(
                   contact['number'] as String,
-                  style: const TextStyle(fontSize: 14, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 14, color: isDark ? Colors.white60 : const Color(0xFF64748B), fontWeight: FontWeight.w500),
                 ),
                 trailing: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade50,
+                    color: Colors.green.shade50.withOpacity(isDark ? 0.1 : 1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.call_rounded, color: Colors.green, size: 20),
