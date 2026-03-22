@@ -6,15 +6,17 @@ interface ChatMessage {
   content: string;
 }
 
-const GITHUB_TOKEN = "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";
+const DEFAULT_GITHUB_TOKEN = "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";
 
 export default function EmergencyChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: 'Hello. I am the E-Suraksha Emergency Assistant. How can I help you today?' }
+    { role: 'assistant', content: 'Hello. I am the E-Rakshak Emergency Assistant. How can I help you today?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('chat_api_key') || '');
+  const [showSettings, setShowSettings] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -37,7 +39,7 @@ export default function EmergencyChatbot() {
     try {
       const systemMessage: ChatMessage = {
         role: 'system',
-        content: `You are an emergency AI assistant for E-Suraksha Campus Safety. 
+        content: `You are an emergency AI assistant for E-Rakshak Campus Safety. 
 Keep your answers brief, helpful, and calm. 
 If someone is in immediate physical danger, tell them to use the SOS button on the app right away.
 Focus on safety and prompt response. Avoid being overly talkative.`
@@ -46,11 +48,12 @@ Focus on safety and prompt response. Avoid being overly talkative.`
       // Ensure we only keep the last 10 messages to limit token usage
       const conversationHistory = messages.slice(-10);
 
+      const tokenToUse = apiKey.trim() || DEFAULT_GITHUB_TOKEN;
       const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GITHUB_TOKEN}`
+          'Authorization': `Bearer ${tokenToUse}`
         },
         body: JSON.stringify({
           model: 'gpt-4o',
@@ -71,9 +74,13 @@ Focus on safety and prompt response. Avoid being overly talkative.`
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Chat error:', error);
-      setMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, I am having trouble connecting right now. If this is a real emergency, please tap the SOS button immediately.' }]);
+      let errorMsg = 'Sorry, I am having trouble connecting right now. If this is a real emergency, please tap the SOS button immediately.';
+      if (error.message.includes('401')) {
+         errorMsg = 'Error 401: Unauthorized. The API key might be invalid or expired. Please click the settings (gear) icon in this chat to provide a valid GitHub/Azure API Token.';
+      }
+      setMessages((prev) => [...prev, { role: 'assistant', content: errorMsg }]);
     } finally {
       setIsLoading(false);
     }
@@ -101,14 +108,44 @@ Focus on safety and prompt response. Avoid being overly talkative.`
               <ShieldAlert className="w-5 h-5" />
               <h3 className="font-semibold">Emergency Bot</h3>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-white hover:text-red-200 transition-colors"
-              aria-label="Close Chat"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className="text-white hover:text-red-200 transition-colors"
+                aria-label="Settings"
+                title="Configure API Key"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white hover:text-red-200 transition-colors"
+                aria-label="Close Chat"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
+
+          {/* Settings Overlay */}
+          {showSettings && (
+             <div className="absolute inset-x-0 top-[56px] bg-white dark:bg-zinc-800 p-4 shadow-md border-b border-border z-20">
+               <h4 className="text-sm font-semibold mb-2 dark:text-white">API Configuration</h4>
+               <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3">
+                 The default access token may be revoked. Provide your own GitHub/Azure OpenAI token here to restore functionality.
+               </p>
+               <input
+                 type="password"
+                 value={apiKey}
+                 onChange={(e) => {
+                   setApiKey(e.target.value);
+                   localStorage.setItem('chat_api_key', e.target.value);
+                 }}
+                 placeholder="Enter GitHub API Token (github_pat_...)"
+                 className="w-full bg-zinc-100 dark:bg-zinc-900 text-foreground rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500 border border-zinc-200 dark:border-zinc-700"
+               />
+             </div>
+          )}
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50 dark:bg-zinc-950">
