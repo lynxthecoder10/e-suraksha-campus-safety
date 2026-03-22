@@ -136,11 +136,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             icon: Icons.analytics_rounded,
             color: Colors.purple,
             isDark: isDark,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Crisis Brain v3.4 Coming Soon')),
-              );
-            },
+            onTap: () => context.push('/admin/crisis-brain'),
+          ),
+          const SizedBox(height: 12),
+          _AdminCategoryCard(
+            title: 'IoT & Smart Devices',
+            description: 'Monitor Panic Poles, Wearables, and Smart Locks.',
+            icon: Icons.router_rounded,
+            color: Colors.teal,
+            isDark: isDark,
+            onTap: () => context.push('/admin/iot-devices'),
+          ),
+          const SizedBox(height: 12),
+          _AdminCategoryCard(
+            title: 'Responder Dispatch',
+            description: 'Manage duty statuses of security and medical personnel.',
+            icon: Icons.emergency_share_rounded,
+            color: Colors.red,
+            isDark: isDark,
+            onTap: () => context.push('/admin/responders'),
           ),
           const SizedBox(height: 40),
           

@@ -136,6 +136,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF020617) : const Color(0xFFF1F5F9),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/chat'),
+        backgroundColor: Colors.redAccent,
+        elevation: 4,
+        icon: const Icon(Icons.smart_toy_rounded, color: Colors.white),
+        label: const Text('E-Rakshak AI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+      ),
       body: SafeArea(
         child: Column(
           children: [

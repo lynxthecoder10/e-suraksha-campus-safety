@@ -4,12 +4,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/supabase_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/navigation/app_router.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize Supabase
   await SupabaseConfig.initialize();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
   
   runApp(
     const ProviderScope(

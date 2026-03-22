@@ -18,6 +18,10 @@ import '../../features/admin/presentation/admin_incidents_screen.dart';
 import '../../features/admin/presentation/admin_incident_detail_screen.dart';
 import '../../features/admin/presentation/admin_users_screen.dart';
 import '../../features/admin/presentation/qr_scanner_screen.dart';
+import '../../features/admin/presentation/crisis_brain_screen.dart';
+import '../../features/admin/presentation/iot_devices_screen.dart';
+import '../../features/admin/presentation/responder_management_screen.dart';
+import '../../features/chatbot/presentation/chat_screen.dart';
 import 'scaffold_with_navbar.dart';
 import '../config/supabase_config.dart';
 import 'go_router_refresh_stream.dart';
@@ -137,6 +141,10 @@ final appRouter = GoRouter(
        builder: (context, state) => const NotificationsScreen(),
     ),
     GoRoute(
+       path: '/chat',
+       builder: (context, state) => const ChatScreen(),
+    ),
+    GoRoute(
       path: '/admin',
       builder: (context, state) => const AdminDashboardScreen(),
       routes: [
@@ -160,6 +168,18 @@ final appRouter = GoRouter(
         GoRoute(
           path: 'scan',
           builder: (context, state) => const QRScannerScreen(),
+        ),
+        GoRoute(
+          path: 'crisis-brain',
+          builder: (context, state) => const CrisisBrainScreen(),
+        ),
+        GoRoute(
+          path: 'iot-devices',
+          builder: (context, state) => const IoTDevicesScreen(),
+        ),
+        GoRoute(
+          path: 'responders',
+          builder: (context, state) => const ResponderManagementScreen(),
         ),
       ],
     ),
