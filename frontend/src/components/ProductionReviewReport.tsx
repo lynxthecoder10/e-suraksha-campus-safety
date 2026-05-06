@@ -496,13 +496,13 @@ export function ProductionReviewReport() {
                       {category.results.map((result, resultIdx) => (
                         <div key={resultIdx} className="flex items-start gap-3 p-3 rounded-lg border">
                           {result.status === 'pass' && (
-                            <CheckCircle2 className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
+                            <CheckCircle2 className="h-5 w-5 text-success mt-0.5 shrink-0" />
                           )}
                           {result.status === 'fail' && (
-                            <XCircle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+                            <XCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
                           )}
                           {result.status === 'warning' && (
-                            <AlertCircle className="h-5 w-5 text-warning mt-0.5 flex-shrink-0" />
+                            <AlertCircle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2 mb-1">
@@ -549,7 +549,7 @@ export function ProductionReviewReport() {
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex items-start gap-3 p-4 rounded-lg bg-success/10 border border-success/20">
-                  <CheckCircle2 className="h-5 w-5 text-success mt-0.5 flex-shrink-0" />
+                  <CheckCircle2 className="h-5 w-5 text-success mt-0.5 shrink-0" />
                   <div>
                     <p className="font-medium text-success">Ready for Production</p>
                     <p className="text-sm text-muted-foreground mt-1">

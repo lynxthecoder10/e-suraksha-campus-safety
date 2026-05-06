@@ -92,7 +92,7 @@ Focus on safety and prompt response. Avoid being overly talkative.`
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 p-4 rounded-full bg-red-600 text-white shadow-xl hover:bg-red-700 transition-all z-50 transform hover:scale-105"
+          className="fixed bottom-6 right-6 p-4 rounded-full bg-red-600 text-white shadow-xl hover:bg-red-700 transition-all z-50 hover:scale-105"
           aria-label="Open Emergency Chat"
         >
           <ShieldAlert className="w-6 h-6" />
@@ -155,7 +155,7 @@ Focus on safety and prompt response. Avoid being overly talkative.`
                 className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center shrink-0">
                     <Bot className="w-5 h-5 text-red-600 dark:text-red-400" />
                   </div>
                 )}
@@ -169,7 +169,7 @@ Focus on safety and prompt response. Avoid being overly talkative.`
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                 </div>
                 {msg.role === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center shrink-0">
                     <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
                 )}
@@ -177,7 +177,7 @@ Focus on safety and prompt response. Avoid being overly talkative.`
             ))}
             {isLoading && (
               <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center shrink-0">
                     <Bot className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
                 <div className="bg-white dark:bg-zinc-800 p-4 rounded-2xl rounded-bl-sm border border-border shadow-sm">
@@ -206,7 +206,7 @@ Focus on safety and prompt response. Avoid being overly talkative.`
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="w-10 h-10 rounded-full bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:hover:bg-red-600 transition-colors flex flex-shrink-0 items-center justify-center"
+                className="w-10 h-10 rounded-full bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:hover:bg-red-600 transition-colors flex shrink-0 items-center justify-center"
               >
                 <Send className="w-4 h-4 ml-0.5" />
               </button>

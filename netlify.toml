@@ -3,6 +3,11 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  # This project is a Vite app, not Next.js. Prevent Netlify's Next.js
+  # runtime plugin from treating frontend/dist as a .next production build.
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

@@ -104,7 +104,7 @@ export default function SOSConfirmationPopup({ confirmation, onClose }: SOSConfi
           <CardContent className="pt-6 space-y-4">
             {/* Alert ID */}
             <div className="flex items-start gap-3">
-              <Hash className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <Hash className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-muted-foreground">Alert ID</p>
                 <p className="text-base font-mono font-semibold break-all" aria-label={`Alert ID ${confirmation.alertId.toString()}`}>
@@ -117,7 +117,7 @@ export default function SOSConfirmationPopup({ confirmation, onClose }: SOSConfi
 
             {/* Timestamp */}
             <div className="flex items-start gap-3">
-              <Clock className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <Clock className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-muted-foreground">Time Sent</p>
                 <p className="text-base font-semibold" aria-label={`Time sent ${formatTimestamp(confirmation.timestamp)}`}>
@@ -130,7 +130,7 @@ export default function SOSConfirmationPopup({ confirmation, onClose }: SOSConfi
 
             {/* Location */}
             <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-muted-foreground">Your Location</p>
                 <p className="text-base font-semibold font-mono break-all" aria-label={`Location ${formatLocation(confirmation.location.latitude, confirmation.location.longitude)}`}>
@@ -143,7 +143,7 @@ export default function SOSConfirmationPopup({ confirmation, onClose }: SOSConfi
 
             {/* Estimated Response Time */}
             <div className="flex items-start gap-3">
-              <Phone className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <Phone className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" aria-hidden="true" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-muted-foreground">Estimated Response Time</p>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -162,7 +162,7 @@ export default function SOSConfirmationPopup({ confirmation, onClose }: SOSConfi
         {/* Confirmation Message */}
         <div className="bg-muted/50 rounded-lg p-4 border border-muted">
           <div className="flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" aria-hidden="true" />
+            <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" aria-hidden="true" />
             <p className="text-sm text-muted-foreground" role="status">
               {confirmation.confirmationMessage}
             </p>

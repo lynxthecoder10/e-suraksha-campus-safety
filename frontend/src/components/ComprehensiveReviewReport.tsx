@@ -904,35 +904,35 @@ export default function ComprehensiveReviewReport() {
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-success shrink-0" />
                     <span className="text-sm font-medium">Session persistence validated</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-success shrink-0" />
                     <span className="text-sm font-medium">Login UI renders instantly</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-success shrink-0" />
                     <span className="text-sm font-medium">SOS acknowledgment functional</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-success shrink-0" />
                     <span className="text-sm font-medium">Media upload operational</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-success shrink-0" />
                     <span className="text-sm font-medium">Admin access management working</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-success shrink-0" />
                     <span className="text-sm font-medium">Accessibility standards met</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-success shrink-0" />
                     <span className="text-sm font-medium">PWA installability confirmed</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+                    <CheckCircle className="h-4 w-4 text-success shrink-0" />
                     <span className="text-sm font-medium">Cross-browser compatibility verified</span>
                   </div>
                 </div>

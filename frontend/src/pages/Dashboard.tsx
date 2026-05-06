@@ -1,15 +1,12 @@
-import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from '@/components/ui/breadcrumb';
+import { Progress } from '@/components/ui/progress';
 import SOSPanel from '../components/SOSPanel';
 import IncidentReportPanel from '../components/IncidentReportPanel';
 import ActiveAlertsPanel from '../components/ActiveAlertsPanel';
-import FeedbackPanel from '../components/FeedbackPanel';
 import MessagingPanel from '../components/MessagingPanel';
 import SafetyMapPanel from '../components/SafetyMapPanel';
 import DigitalIDPanel from '../components/DigitalIDPanel';
@@ -17,384 +14,377 @@ import UserReportsPanel from '../components/UserReportsPanel';
 import UserProfilePanel from '../components/UserProfilePanel';
 import HelpDialog from '../components/HelpDialog';
 import {
-  Bell,
-  FileText,
-  MessageSquare,
-  Map,
-  CreditCard,
-  Shield,
   AlertCircle,
+  Bell,
   CheckCircle,
-  Clock,
-  MessageCircle,
-  IdCard,
-  User
+  ChevronRight,
+  CreditCard,
+  FileText,
+  Home,
+  Map,
+  MessageSquare,
+  PhoneCall,
+  PlugZap,
+  Radio,
+  Shield,
+  Smartphone,
+  User,
+  Wifi,
+  type LucideIcon,
 } from 'lucide-react';
 import { useGetCallerUserProfile, useGetDashboardSummary } from '../hooks/useQueries';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const menuItems = [
+  { value: 'home', label: 'Safety Home', helper: 'Emergency, campus status, device health', icon: Home },
+  { value: 'alerts', label: 'Campus Alerts', helper: 'Live safety notices', icon: Bell },
+  { value: 'report', label: 'Report Incident', helper: 'Send a concern to security', icon: FileText },
+  { value: 'my-reports', label: 'My Reports', helper: 'Track submitted incidents', icon: FileText },
+  { value: 'messages', label: 'Messages', helper: 'Talk to campus security', icon: MessageSquare },
+  { value: 'map', label: 'Safety Map', helper: 'Routes, zones, and hotspots', icon: Map },
+  { value: 'id', label: 'Digital ID', helper: 'QR-based campus access', icon: CreditCard },
+  { value: 'profile', label: 'Profile', helper: 'Personal and emergency details', icon: User },
+];
+
+const campusDetails = [
+  { label: 'Security desk', value: 'Open 24/7', helper: 'Main gate response team online', icon: Shield },
+  { label: 'Safe routes', value: '6 active', helper: 'Library, hostel, labs, and parking', icon: Map },
+  { label: 'Campus network', value: 'Connected', helper: 'Emergency updates enabled', icon: Wifi },
+];
+
+const deviceSignals = [
+  { label: 'Location sharing', value: 92, helper: 'Ready for emergency response', icon: Radio },
+  { label: 'Device connectivity', value: 88, helper: 'Online and receiving alerts', icon: Smartphone },
+  { label: 'Emergency sync', value: 96, helper: 'SOS queue and messages available', icon: PlugZap },
+];
+
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState('alerts');
+  const [activePage, setActivePage] = useState('home');
 
   const { data: userProfile, isLoading: profileLoading } = useGetCallerUserProfile();
   const { data: dashboardSummary, isLoading: summaryLoading } = useGetDashboardSummary();
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const getInitials = (name: string) => name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  const openPage = (page: string) => {
+    setActivePage(page);
+    requestAnimationFrame(() => {
+      document.getElementById('student-page-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   const userName = userProfile?.name || 'Student';
   const userInitials = getInitials(userName);
+  const activeAlertsCount = Number(dashboardSummary?.activeAlertsCount || 0);
+  const userReportsCount = Number(dashboardSummary?.userReportsCount || 0);
+  const activeMenuItem = menuItems.find(item => item.value === activePage) || menuItems[0];
+  const ActiveIcon = activeMenuItem.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="container py-6 space-y-6 animate-fade-in">
-        {/* Breadcrumb Navigation */}
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Student Dashboard</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        {/* Page Title with Help */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Student Dashboard</h1>
-            <p className="text-muted-foreground">Your safety is our priority</p>
-          </div>
-          <HelpDialog />
-        </div>
-
-        {/* Emergency SOS Button - Moved to Top */}
-        <Card className="border-2 border-destructive/30 shadow-xl bg-gradient-to-br from-destructive/5 to-destructive/10">
-          <CardContent className="p-6">
-            <SOSPanel />
-          </CardContent>
-        </Card>
-
-        {/* Personalized Header Area */}
-        <Card className="border-2 border-primary/20 shadow-lg overflow-hidden">
-          <div
-            className="h-24 bg-gradient-to-r from-primary via-primary/90 to-primary/80 relative"
-            style={{
-              backgroundImage: 'url(/assets/generated/personalized-header-bg.dim_800x120.png)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/60" />
-          </div>
-          <CardContent className="pt-0 pb-6 px-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 -mt-12 relative z-10">
-              <Avatar className="h-24 w-24 border-4 border-background shadow-xl ring-2 ring-primary/20">
-                <AvatarImage src={userProfile?.profilePhoto?.[0] || "/assets/generated/student-avatar-placeholder.dim_100x100.svg"} alt={userName} />
-                <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
-                  {userInitials}
-                </AvatarFallback>
-              </Avatar>
-
-              <div className="flex-1 space-y-2 mt-2">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h2 className="text-2xl font-bold text-foreground">
-                    {profileLoading ? <Skeleton className="h-8 w-32" /> : `Welcome, ${userName}`}
-                  </h2>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
-                    <Shield className="h-3 w-3 mr-1" />
-                    Student
-                  </Badge>
+    <div className="min-h-screen bg-[linear-gradient(135deg,oklch(var(--background)),oklch(var(--accent)/0.45))]">
+      <div className="container grid gap-6 py-5 pb-28 lg:grid-cols-[320px_1fr] lg:py-8">
+        <aside className="space-y-4 lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1 safe-scrollbar">
+          <Card className="border-primary/15 bg-card/95 shadow-lg">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-14 w-14 border-2 border-primary/20 shadow-md">
+                  <AvatarImage src={userProfile?.profilePhoto?.[0] || '/assets/generated/student-avatar-placeholder.dim_100x100.svg'} alt={userName} />
+                  <AvatarFallback className="bg-primary text-lg font-bold text-primary-foreground">{userInitials}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="truncate text-base font-bold text-foreground">
+                    {profileLoading ? 'Loading profile...' : userName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Student safety dashboard</p>
                 </div>
-                <p className="text-muted-foreground text-sm">
-                  Your safety is our priority. Quick access to emergency services and campus safety features.
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-destructive/25 bg-destructive/5 shadow-lg">
+            <CardContent className="space-y-3 p-4 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-lg">
+                <PhoneCall className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-bold text-destructive">Emergency is always one tap away</p>
+                <p className="text-xs text-muted-foreground">Use the SOS button from any dashboard page.</p>
+              </div>
+              <Button
+                variant="destructive"
+                className="w-full rounded-2xl"
+                onClick={() => document.getElementById('main-emergency-button')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+              >
+                Go to SOS
+              </Button>
+            </CardContent>
+          </Card>
+
+          <nav aria-label="Student dashboard menu" className="space-y-2">
+            {menuItems.map(({ value, label, helper, icon: Icon }) => {
+              const isActive = activePage === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => openPage(value)}
+                  className={`w-full rounded-2xl border p-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isActive
+                    ? 'border-primary/40 bg-primary text-primary-foreground shadow-lg shadow-primary/15'
+                    : 'border-border/70 bg-card/90 hover:border-primary/30 hover:bg-primary/5'
+                    }`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <span className="flex items-center gap-3">
+                    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isActive ? 'bg-primary-foreground/15' : 'bg-primary/10 text-primary'}`}>
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold">{label}</span>
+                      <span className={`block text-xs ${isActive ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>{helper}</span>
+                    </span>
+                    <ChevronRight className="h-4 w-4 opacity-70" />
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <main id="student-page-content" className="min-w-0 scroll-mt-24 space-y-6">
+          <section className="rounded-[2rem] border border-primary/15 bg-card/95 p-5 shadow-xl md:p-7">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <Badge variant="outline" className="mb-3 rounded-full border-success/30 bg-success/10 text-success">
+                  <CheckCircle className="mr-1.5 h-3.5 w-3.5" />
+                  Campus safety system online
+                </Badge>
+                <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+                  {activePage === 'home' ? `Hi ${userName}, stay safe on campus.` : activeMenuItem.label}
+                </h1>
+                <p className="mt-2 max-w-2xl text-muted-foreground">
+                  {activePage === 'home'
+                    ? 'A calmer student dashboard focused on emergency access, campus status, and your essential safety tools.'
+                    : activeMenuItem.helper}
                 </p>
               </div>
-
-              <div className="flex gap-2 flex-wrap sm:flex-nowrap">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActiveTab('profile')}
-                  className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
-                >
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">Profile</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActiveTab('messages')}
-                  className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  <span className="hidden sm:inline">Messages</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActiveTab('id')}
-                  className="gap-2 hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all"
-                >
-                  <IdCard className="h-4 w-4" />
-                  <span className="hidden sm:inline">Digital ID</span>
-                </Button>
-              </div>
+              <HelpDialog />
             </div>
-          </CardContent>
-        </Card>
+          </section>
 
-        {/* Dashboard Summary Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-destructive">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Active Alerts</CardTitle>
-                <AlertCircle className="h-5 w-5 text-destructive" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {summaryLoading ? (
-                <Skeleton className="h-10 w-20" />
-              ) : (
-                <div className="space-y-1">
-                  <div className="text-3xl font-bold text-foreground">{Number(dashboardSummary?.activeAlertsCount || 0)}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {Number(dashboardSummary?.activeAlertsCount || 0) === 0 ? 'All clear' : 'Emergency situations'}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {activePage === 'home' ? (
+            <HomePage
+              activeAlertsCount={activeAlertsCount}
+              userReportsCount={userReportsCount}
+              summaryLoading={summaryLoading}
+              openPage={openPage}
+            />
+          ) : (
+            <FeaturePage icon={ActiveIcon} title={activeMenuItem.label} description={activeMenuItem.helper}>
+              {activePage === 'alerts' && <ActiveAlertsPanel />}
+              {activePage === 'report' && <IncidentReportPanel />}
+              {activePage === 'my-reports' && <UserReportsPanel />}
+              {activePage === 'messages' && <MessagingPanel />}
+              {activePage === 'map' && <SafetyMapPanel />}
+              {activePage === 'id' && <DigitalIDPanel />}
+              {activePage === 'profile' && <UserProfilePanel />}
+            </FeaturePage>
+          )}
+        </main>
+      </div>
 
-          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-primary">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Your Reports</CardTitle>
-                <FileText className="h-5 w-5 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {summaryLoading ? (
-                <Skeleton className="h-10 w-20" />
-              ) : (
-                <div className="space-y-1">
-                  <div className="text-3xl font-bold text-foreground">{Number(dashboardSummary?.userReportsCount || 0)}</div>
-                  <p className="text-xs text-muted-foreground">
-                    {Number(dashboardSummary?.userReportsCount || 0) === 0 ? 'No reports yet' : 'Submitted incidents'}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-success">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Safety Status</CardTitle>
-                <CheckCircle className="h-5 w-5 text-success" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                <div className="text-3xl font-bold text-success">Safe</div>
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  Last checked: {new Date().toLocaleTimeString()}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="fixed inset-x-3 bottom-3 z-40 rounded-3xl border border-border/70 bg-card/95 p-2 shadow-2xl backdrop-blur md:inset-x-auto md:left-5 md:w-80" aria-label="Emergency quick actions">
+        <div className="grid grid-cols-3 gap-2 md:grid-cols-[1.25fr_1fr_1fr]">
+          <Button
+            variant="destructive"
+            className="h-12 rounded-2xl gap-1.5 text-xs font-bold md:text-sm"
+            onClick={() => document.getElementById('main-emergency-button')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+          >
+            <PhoneCall className="h-4 w-4" />
+            SOS
+          </Button>
+          <Button variant="outline" className="h-12 rounded-2xl gap-1.5 text-xs md:text-sm" onClick={() => openPage('report')}>
+            <FileText className="h-4 w-4" />
+            Report
+          </Button>
+          <Button variant="outline" className="h-12 rounded-2xl gap-1.5 text-xs md:text-sm" onClick={() => openPage('map')}>
+            <Map className="h-4 w-4" />
+            Map
+          </Button>
         </div>
-
-        <Separator className="my-6" />
-
-        {/* Enhanced Navigation Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <Card className="border-2 border-primary/20">
-            <CardContent className="p-2">
-              <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7 h-auto gap-1 bg-transparent">
-                <TabsTrigger
-                  value="alerts"
-                  className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  <Bell className="h-5 w-5" />
-                  <span className="text-xs sm:text-sm font-medium">Alerts</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="report"
-                  className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  <FileText className="h-5 w-5" />
-                  <span className="text-xs sm:text-sm font-medium">Report</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="my-reports"
-                  className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  <FileText className="h-5 w-5" />
-                  <span className="text-xs sm:text-sm font-medium">My Reports</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="messages"
-                  className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  <MessageSquare className="h-5 w-5" />
-                  <span className="text-xs sm:text-sm font-medium">Messages</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="map"
-                  className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  <Map className="h-5 w-5" />
-                  <span className="text-xs sm:text-sm font-medium">Safety Map</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="id"
-                  className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  <CreditCard className="h-5 w-5" />
-                  <span className="text-xs sm:text-sm font-medium">Digital ID</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="profile"
-                  className="flex flex-col sm:flex-row items-center gap-2 py-3 px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                >
-                  <User className="h-5 w-5" />
-                  <span className="text-xs sm:text-sm font-medium">Profile</span>
-                </TabsTrigger>
-              </TabsList>
-            </CardContent>
-          </Card>
-
-          <TabsContent value="alerts" className="space-y-4 animate-fade-in">
-            <Card className="border-2 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5 text-primary" />
-                  Active Emergency Alerts
-                </CardTitle>
-                <CardDescription>
-                  View and monitor active emergency situations on campus
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ActiveAlertsPanel />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="report" className="space-y-4 animate-fade-in">
-            <Card className="border-2 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  Report an Incident
-                </CardTitle>
-                <CardDescription>
-                  Submit safety concerns or incident reports with location and media
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <IncidentReportPanel />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="my-reports" className="space-y-4 animate-fade-in">
-            <Card className="border-2 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  My Incident Reports
-                </CardTitle>
-                <CardDescription>
-                  View your submitted reports with status tracking and admin comments
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <UserReportsPanel />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="messages" className="space-y-4 animate-fade-in">
-            <Card className="border-2 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-primary" />
-                  Secure Messaging
-                </CardTitle>
-                <CardDescription>
-                  Communicate securely with campus security personnel
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <MessagingPanel />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="map" className="space-y-4 animate-fade-in">
-            <Card className="border-2 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Map className="h-5 w-5 text-primary" />
-                  Campus Safety Map
-                </CardTitle>
-                <CardDescription>
-                  View incident heat maps and evacuation routes
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <SafetyMapPanel />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="id" className="space-y-4 animate-fade-in">
-            <Card className="border-2 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-primary" />
-                  Digital Identity Card
-                </CardTitle>
-                <CardDescription>
-                  Generate your QR-based digital ID for campus access
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <DigitalIDPanel />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="profile" className="space-y-4 animate-fade-in">
-            <Card className="border-2 border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" />
-                  My Profile
-                </CardTitle>
-                <CardDescription>
-                  View and update your profile information
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <UserProfilePanel />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
+  );
+}
+
+type HomePageProps = {
+  activeAlertsCount: number;
+  userReportsCount: number;
+  summaryLoading: boolean;
+  openPage: (page: string) => void;
+};
+
+function HomePage({ activeAlertsCount, userReportsCount, summaryLoading, openPage }: HomePageProps) {
+  return (
+    <div className="space-y-6">
+      <Card id="main-emergency-button" className="scroll-mt-24 border-2 border-destructive/30 bg-gradient-to-br from-destructive/10 via-card to-card shadow-2xl shadow-destructive/10">
+        <CardHeader className="text-center">
+          <Badge variant="outline" className="mx-auto w-fit rounded-full border-destructive/30 bg-background/80 text-destructive">
+            Priority action
+          </Badge>
+          <CardTitle className="text-3xl text-destructive md:text-4xl">Emergency SOS</CardTitle>
+          <CardDescription className="mx-auto max-w-2xl text-base">
+            Press SOS to alert campus security and share your location. Keep this page open during travel, late hours, or when you feel unsafe.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SOSPanel />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <StatusCard
+          label="Active alerts"
+          value={summaryLoading ? null : activeAlertsCount.toString()}
+          helper={activeAlertsCount === 0 ? 'No active campus emergencies' : 'Open alerts need attention'}
+          icon={AlertCircle}
+          tone="destructive"
+          onClick={() => openPage('alerts')}
+        />
+        <StatusCard
+          label="Your reports"
+          value={summaryLoading ? null : userReportsCount.toString()}
+          helper={userReportsCount === 0 ? 'No reports submitted yet' : 'Tap to review status'}
+          icon={FileText}
+          tone="primary"
+          onClick={() => openPage('my-reports')}
+        />
+        <StatusCard
+          label="Safety status"
+          value="Safe"
+          helper="Campus safety services connected"
+          icon={CheckCircle}
+          tone="success"
+          onClick={() => openPage('map')}
+        />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1fr_0.9fr]">
+        <Card className="border-primary/15 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-primary" />
+              Campus safety details
+            </CardTitle>
+            <CardDescription>Key campus information shown up front without crowding your tools.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 md:grid-cols-3 xl:grid-cols-1">
+            {campusDetails.map(({ label, value, helper, icon: Icon }) => (
+              <div key={label} className="rounded-2xl border border-border/70 bg-muted/30 p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="rounded-xl bg-primary/10 p-2 text-primary">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <Badge variant="outline" className="rounded-full bg-background/70">{value}</Badge>
+                </div>
+                <p className="font-semibold">{label}</p>
+                <p className="text-sm text-muted-foreground">{helper}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="border-primary/15 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Smartphone className="h-5 w-5 text-primary" />
+              Device connectivity
+            </CardTitle>
+            <CardDescription>Quick confidence checks for emergency readiness.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {deviceSignals.map(({ label, value, helper, icon: Icon }) => (
+              <div key={label} className="space-y-2 rounded-2xl border border-border/70 bg-muted/30 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Icon className="h-4 w-4 text-primary" />
+                    <p className="font-semibold">{label}</p>
+                  </div>
+                  <span className="text-sm font-bold text-primary">{value}%</span>
+                </div>
+                <Progress value={value} className="h-2" />
+                <p className="text-xs text-muted-foreground">{helper}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+type StatusCardProps = {
+  label: string;
+  value: string | null;
+  helper: string;
+  icon: LucideIcon;
+  tone: 'destructive' | 'primary' | 'success';
+  onClick: () => void;
+};
+
+function StatusCard({ label, value, helper, icon: Icon, tone, onClick }: StatusCardProps) {
+  const toneClass = {
+    destructive: 'text-destructive bg-destructive/10 border-destructive/25',
+    primary: 'text-primary bg-primary/10 border-primary/25',
+    success: 'text-success bg-success/10 border-success/25',
+  }[tone];
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="rounded-3xl border border-border/70 bg-card p-5 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className={`rounded-2xl border p-3 ${toneClass}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+      {value === null ? <Skeleton className="mt-2 h-9 w-20" /> : <p className="mt-1 text-3xl font-bold">{value}</p>}
+      <p className="mt-1 text-sm text-muted-foreground">{helper}</p>
+    </button>
+  );
+}
+
+type FeaturePageProps = {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  children: ReactNode;
+};
+
+function FeaturePage({ icon: Icon, title, description, children }: FeaturePageProps) {
+  return (
+    <Card className="border-primary/15 shadow-xl">
+      <CardHeader>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <Icon className="h-6 w-6 text-primary" />
+              {title}
+            </CardTitle>
+            <CardDescription className="mt-1">{description}</CardDescription>
+          </div>
+          <Badge variant="outline" className="w-fit rounded-full bg-primary/5 text-primary">Dedicated page</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   );
 }
