@@ -511,42 +511,42 @@ export default function TechnicalOverviewModal() {
                   <CardContent className="pt-6">
                     <div className="space-y-3">
                       <div className="flex items-start gap-3">
-                        <Globe className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                        <Globe className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                         <div>
                           <p className="font-medium text-sm">Decentralized Hosting</p>
                           <p className="text-xs text-muted-foreground">Hosted on Internet Computer blockchain with no single point of failure</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Lock className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                        <Lock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                         <div>
                           <p className="font-medium text-sm">End-to-End Security</p>
                           <p className="text-xs text-muted-foreground">HTTPS encryption, secure session management, and blockchain immutability</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Zap className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                        <Zap className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                         <div>
                           <p className="font-medium text-sm">High Performance</p>
                           <p className="text-xs text-muted-foreground">Global CDN, optimized caching, and sub-second response times</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Smartphone className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                        <Smartphone className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                         <div>
                           <p className="font-medium text-sm">PWA Installation</p>
                           <p className="text-xs text-muted-foreground">Installable on Android, iOS, Windows, Mac, and Linux devices</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Database className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                        <Database className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                         <div>
                           <p className="font-medium text-sm">Offline Capability</p>
                           <p className="text-xs text-muted-foreground">Service worker caching enables offline SOS and dashboard access</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Activity className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                        <Activity className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                         <div>
                           <p className="font-medium text-sm">Auto Updates</p>
                           <p className="text-xs text-muted-foreground">Automatic service worker updates with user notification</p>
