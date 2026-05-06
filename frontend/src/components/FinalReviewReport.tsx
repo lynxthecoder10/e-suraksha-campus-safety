@@ -363,23 +363,23 @@ export default function FinalReviewReport() {
               <CardContent className="pt-6">
                 <ul className="space-y-2">
                   <li className="flex items-start gap-2">
-                    <RefreshCw className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <RefreshCw className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     <span className="text-sm">Continue monitoring session persistence across different network conditions and device types</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Bell className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <Bell className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     <span className="text-sm">Gather user feedback on SOS acknowledgement popup timing and auto-close duration</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Users className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <Users className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     <span className="text-sm">Monitor admin access grant operations for security compliance and audit trail completeness</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <FileText className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <FileText className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     <span className="text-sm">Track media upload performance for large files and optimize compression if needed</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                     <span className="text-sm">Validate location accuracy in various campus areas and indoor environments</span>
                   </li>
                 </ul>
