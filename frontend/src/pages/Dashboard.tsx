@@ -71,11 +71,22 @@ export default function Dashboard() {
     .toUpperCase()
     .slice(0, 2);
 
+  const scrollToElement = (elementId: string, block: ScrollLogicalPosition = 'start') => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById(elementId)?.scrollIntoView({ behavior: 'smooth', block });
+      });
+    });
+  };
+
   const openPage = (page: string) => {
     setActivePage(page);
-    requestAnimationFrame(() => {
-      document.getElementById('student-page-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    scrollToElement('student-page-content');
+  };
+
+  const openEmergency = () => {
+    setActivePage('home');
+    scrollToElement('main-emergency-button', 'center');
   };
 
   const userName = userProfile?.name || 'Student';
@@ -87,7 +98,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(135deg,oklch(var(--background)),oklch(var(--accent)/0.45))]">
-      <div className="container grid gap-6 py-5 pb-28 lg:grid-cols-[320px_1fr] lg:py-8">
+      <div className="container grid gap-6 py-5 pb-44 md:pb-32 lg:grid-cols-[320px_1fr] lg:py-8">
         <aside className="space-y-4 lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1 safe-scrollbar">
           <Card className="border-primary/15 bg-card/95 shadow-lg">
             <CardContent className="p-4">
@@ -118,7 +129,7 @@ export default function Dashboard() {
               <Button
                 variant="destructive"
                 className="w-full rounded-2xl"
-                onClick={() => document.getElementById('main-emergency-button')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                onClick={openEmergency}
               >
                 Go to SOS
               </Button>
@@ -197,12 +208,12 @@ export default function Dashboard() {
         </main>
       </div>
 
-      <div className="fixed inset-x-3 bottom-3 z-40 rounded-3xl border border-border/70 bg-card/95 p-2 shadow-2xl backdrop-blur md:inset-x-auto md:left-5 md:w-80" aria-label="Emergency quick actions">
+      <div className="fixed inset-x-3 bottom-24 z-40 rounded-3xl border border-border/70 bg-card/95 p-2 shadow-2xl backdrop-blur md:inset-x-auto md:bottom-5 md:left-5 md:w-80" aria-label="Emergency quick actions">
         <div className="grid grid-cols-3 gap-2 md:grid-cols-[1.25fr_1fr_1fr]">
           <Button
             variant="destructive"
             className="h-12 rounded-2xl gap-1.5 text-xs font-bold md:text-sm"
-            onClick={() => document.getElementById('main-emergency-button')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+            onClick={openEmergency}
           >
             <PhoneCall className="h-4 w-4" />
             SOS
